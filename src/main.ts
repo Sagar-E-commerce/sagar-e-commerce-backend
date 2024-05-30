@@ -13,12 +13,10 @@ async function bootstrap() {
     };
     app.enableCors(corsOptions);
 
-  app.use('/public',express.static(join(__dirname,'..','public')))
-  console.log('Serving static files from:', join(__dirname, '..', 'public'));
 
-  app.setGlobalPrefix('api/v1/babies_n_stuff_api/')//
+  app.setGlobalPrefix('api/v1/sagar_ecommerce_api/')//
   app.useGlobalPipes(new ValidationPipe)
 
-  await app.listen(3200||process.env.PORT);
+  await app.listen(process.env.PORT|| 3000);
 }
 bootstrap();
