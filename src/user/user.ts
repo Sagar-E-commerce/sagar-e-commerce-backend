@@ -18,6 +18,7 @@ export interface  IUser {
     profile_picture: string
     LGA_of_Home_Address: string
     cityOfResidence:string
+    totalRevenue: number;
     RegisteredAt : Date
     UpdatedAt : Date
     role:Role

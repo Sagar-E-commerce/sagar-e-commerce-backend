@@ -133,6 +133,67 @@ export class BrowseService {
     }
   }
 
+
+  async fetchLatestProducts(page: number = 1, limit: number = 30) {
+    try {
+      const skip = (page - 1) * limit;
+      const [products, total] = await this.productRepo.findAndCount({
+        skip,
+        take: limit,
+        order: {
+          createdAT: 'DESC',
+        },
+        relations: ['video', 'category'],
+      });
+
+      if (total === 0) {
+        throw new NotFoundException('No products have been posted at the moment');
+      }
+
+      return { products, total, page, limit };
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw new NotFoundException(error.message);
+      } else {
+        console.error(error);
+        throw new InternalServerErrorException(
+          'Something went wrong while trying to fetch the latest products',
+          error.message
+        );
+      }
+    }
+  }
+
+  async fetchHottestProducts(page: number = 1, limit: number = 30) {
+    try {
+      const skip = (page - 1) * limit;
+      const [products, total] = await this.productRepo.findAndCount({
+        skip,
+        take: limit,
+        order: {
+          purchaseCount: 'DESC',
+        },
+        relations: ['video', 'category'],
+      });
+
+      if (total === 0) {
+        throw new NotFoundException('No products have been posted at the moment');
+      }
+
+      return { products, total, page, limit };
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw new NotFoundException(error.message);
+      } else {
+        console.error(error);
+        throw new InternalServerErrorException(
+          'Something went wrong while trying to fetch the hottest products',
+          error.message
+        );
+      }
+    }
+  }
+
   //fetch all products
   async fetchOneProduct(productID: number) {
     try {
@@ -342,13 +403,13 @@ export class BrowseService {
       });
       if (!product) throw new NotFoundException('product not found');
 
-      //  // Check if the selected color and size are available
-      //  if (!product.available_colors.includes(dto.color)) {
-      //   throw new NotAcceptableException('Selected color is not available');
-      // }
-      // if (!product.available_sizes.includes(dto.size)) {
-      //   throw new NotAcceptableException('Selected size is not available');
-      // }
+       // Check if the selected color and size are available
+       if (!product.available_colors.includes(dto.color)) {
+        throw new NotAcceptableException('Selected color is not available');
+      }
+      if (!product.available_sizes.includes(dto.size)) {
+        throw new NotAcceptableException('Selected size is not available');
+      }
 
       // Check if the product has enough stock
       if (product.stock < dto.quantity) {
@@ -359,6 +420,13 @@ export class BrowseService {
 
       // Find the cart item if it already exists in the cart
       const cartItem = cart.items.find((item) => item.product.id === productID);
+
+       // Apply wholesale pricing logic
+       let itemPrice = product.price;
+       if (dto.quantity >= product.minWholesaleQuantity) {
+         itemPrice = product.wholesalePrice;
+       }
+
       if (cartItem) {
         // If the item is already in the cart, increase the quantity
         cartItem.quantity += dto.quantity;
@@ -369,7 +437,7 @@ export class BrowseService {
           quantity: dto.quantity,
           color: dto.color,
           sizes: dto.size,
-          price: product.price,
+          price: itemPrice,
           addedAT: new Date(),
         });
         cart.items.push(newItem);

@@ -61,6 +61,9 @@ export class UserEntity implements IUser{
     @Column({nullable:true})
     Nationality: string;
 
+    @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
+    totalRevenue: number;
+
     @Column({nullable:true,default:false})
     isLoggedIn: boolean;
 

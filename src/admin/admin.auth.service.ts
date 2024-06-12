@@ -77,7 +77,7 @@ export class AdminAuthService {
 
       const hashedpassword = await this.generatorservice.hashpassword(
         dto.password,
-      );
+      )
 
       const admin = new AdminEntity();
       admin.adminID = `#BASA-${await this.generatorservice.generateUserID()}`;
@@ -89,32 +89,30 @@ export class AdminAuthService {
       admin.admintype = dto.adminType
       admin.RegisteredAt = new Date();
       admin.isRegistered = true;
-      admin.isVerified = true
-      admin.isActivated= true
 
       await this.adminRepo.save(admin);
 
-      // //2fa authentication
-      // const emiailverificationcode =
-      //   await this.generatorservice.generateEmailToken();
+      //2fa authentication
+      const emiailverificationcode =
+        await this.generatorservice.generateEmailToken();
 
-      // //otp
-      // const otp = new UserOtp();
-      // otp.email = dto.email;
-      // otp.otp = emiailverificationcode;
-      // otp.role = admin.role;
-      // const twominuteslater = new Date();
-      // await twominuteslater.setMinutes(twominuteslater.getMinutes() + 2);
-      // otp.expiration_time = twominuteslater;
-      // await this.otprepo.save(otp);
+      //otp
+      const otp = new UserOtp();
+      otp.email = dto.email;
+      otp.otp = emiailverificationcode;
+      otp.role = admin.role;
+      const twominuteslater = new Date();
+      await twominuteslater.setMinutes(twominuteslater.getMinutes() + 2);
+      otp.expiration_time = twominuteslater;
+      await this.otprepo.save(otp);
 
-      // // mail
-      // await this.mailerservice.SendVerificationeMail(
-      //   dto.email,
-      //   dto.fullname,
-      //   emiailverificationcode,
-      //   twominuteslater,
-      // );
+      // mail
+      await this.mailerservice.SendVerificationeMail(
+        dto.email,
+        dto.fullname,
+        emiailverificationcode,
+        twominuteslater,
+      );
 
       //save the notification
       const notification = new Notifications();

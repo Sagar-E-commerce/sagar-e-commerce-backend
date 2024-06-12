@@ -63,13 +63,13 @@ export class CartService {
       });
       if (!product) throw new NotFoundException('product not found');
 
-      //  // Check if the selected color and size are available
-      //  if (!product.available_colors.includes(dto.color)) {
-      //   throw new NotAcceptableException('Selected color is not available');
-      // }
-      // if (!product.available_sizes.includes(dto.size)) {
-      //   throw new NotAcceptableException('Selected size is not available');
-      // }
+       // Check if the selected color and size are available
+       if (!product.available_colors.includes(dto.color)) {
+        throw new NotAcceptableException('Selected color is not available');
+      }
+      if (!product.available_sizes.includes(dto.size)) {
+        throw new NotAcceptableException('Selected size is not available');
+      }
 
       // Check if the product has enough stock
       if (product.stock < dto.quantity) {
@@ -80,6 +80,12 @@ export class CartService {
 
       // Find the cart item if it already exists in the cart
       const cartItem = cart.items.find((item) => item.product.id === productID);
+      // Apply wholesale pricing logic
+      let itemPrice = product.price;
+      if (dto.quantity >= product.minWholesaleQuantity) {
+        itemPrice = product.wholesalePrice;
+      }
+
       if (cartItem) {
         // If the item is already in the cart, increase the quantity
         cartItem.quantity += dto.quantity;
@@ -90,7 +96,7 @@ export class CartService {
           quantity: dto.quantity,
           color: dto.color,
           sizes: dto.size,
-          price: product.price,
+          price: itemPrice,
           addedAT: new Date(),
         });
         cart.items.push(newItem);

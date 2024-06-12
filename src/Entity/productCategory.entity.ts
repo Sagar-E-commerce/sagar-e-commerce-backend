@@ -19,7 +19,7 @@ export class CategoryEntity implements ICategory {
   @Column({ nullable: true, type:'timestamp' })
   updatedAT: Date;
 
-  @OneToMany(() => ProductEntity, (product) => product.category)
+  @OneToMany(() => ProductEntity, (product) => product.category,{nullable:true})
   products: ProductEntity[];
 }
 

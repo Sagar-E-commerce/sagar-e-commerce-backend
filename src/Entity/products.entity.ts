@@ -17,15 +17,17 @@ export interface IProduct{
     description:string
     createdAT:Date
     updatedAT:Date
+    purchaseCount: number;
     video:VideoEntity[]
     category: CategoryEntity;
+    wholesalePrice: number;
+    minWholesaleQuantity: number;
     hasTax:boolean
     taxRate:number
     available_sizes:string[]
     available_colors:string[]
     favourites: FavouriteEntity[]
     
-
 }
 
 @Entity({name:'Products'})
@@ -48,6 +50,12 @@ export class ProductEntity implements IProduct{
 
     @Column('decimal',{nullable:true,})
     taxRate:number
+
+    @Column('numeric', { nullable: true })
+    wholesalePrice: number;
+  
+    @Column({ nullable: true, }) 
+    minWholesaleQuantity: number;
 
     @Column({nullable:true,type:'simple-array'})
     productImages: string[]
@@ -77,6 +85,9 @@ export class ProductEntity implements IProduct{
     @Column({type:'simple-array',nullable:true})
     available_sizes: string[]
 
+    @Column({ default: 0 })
+    purchaseCount: number;
+
     @Column({nullable:true,type:'timestamp'})
     createdAT: Date
 
@@ -86,7 +97,7 @@ export class ProductEntity implements IProduct{
     @OneToMany(()=>VideoEntity,vid=> vid.product)
     video: VideoEntity[]
 
-    @ManyToOne(() => CategoryEntity, (category) => category.products)
+    @ManyToOne(() => CategoryEntity, (category) => category.products, {nullable:true})
     category: CategoryEntity;
 
     @OneToMany(()=>FavouriteEntity,like=>like.product)

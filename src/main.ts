@@ -14,7 +14,7 @@ async function bootstrap() {
     app.enableCors(corsOptions);
 
 
-  app.setGlobalPrefix('api/v1/sagar_ecommerce_api/')//
+  app.setGlobalPrefix('api/v1/sagar_stores_api/')//
   app.useGlobalPipes(new ValidationPipe)
 
   await app.listen(process.env.PORT|| 3000);

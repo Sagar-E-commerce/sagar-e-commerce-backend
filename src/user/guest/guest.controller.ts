@@ -52,6 +52,23 @@ export class BrowseController {
     return await this.browseservice.fetchAllProducts(page, limit);
   }
 
+  @Get('fetch-all-latest-products')
+  async FetchAllLatestProduct(
+    @Query('page') page: number,
+    @Query('limit') limit: number,
+  ) {
+    return await this.browseservice.fetchLatestProducts(page, limit);
+  }
+
+  @Get('fetch-all-hottest-products')
+  async FetchAllHotestProduct(
+    @Query('page') page: number,
+    @Query('limit') limit: number,
+  ) {
+    return await this.browseservice.fetchHottestProducts(page, limit);
+  }
+
+
   @Get('fetch-one-product/:productID')
   async FetchOneProduct(@Param('productID') productID: number) {
     return await this.browseservice.fetchOneProduct(productID);

@@ -75,11 +75,25 @@ export class CreateProductDto{
 
     @IsArray()
     @IsString()
+    @IsOptional()
     available_sizes:string[]
 
     @IsArray()
     @IsString()
+    @IsOptional()
     available_colors:string[]
+
+
+    @IsNotEmpty()
+    @IsNumber()
+    @Transform(({ value }) => parseFloat(value))
+    wholesalePrice:number
+
+    @IsNotEmpty()
+    @IsNumber()
+    @Transform(({ value }) => parseInt(value,10))
+    minWholesaleQuantity:number
+
 
     @IsOptional()
     @IsNumber()
@@ -121,6 +135,18 @@ export class UpdateProductDto{
     @IsOptional()
     @IsString()
     name:string
+
+
+    @IsOptional()
+    @IsNumber()
+    @Transform(({ value }) => parseFloat(value))
+    wholesalePrice:number
+
+    @IsOptional()
+    @IsNumber()
+    @Transform(({ value }) => parseInt(value,10))
+    minWholesaleQuantity:number
+
 
     @IsOptional()
     @IsNumber()

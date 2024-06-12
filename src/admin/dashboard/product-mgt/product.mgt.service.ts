@@ -134,9 +134,14 @@ export class ProductMgtService {
   async TakeDownVideo(videoID: string) {
     try {
       const video = await this.videorepo.findOne({
-        where: { id: videoID },
+        where: { id: videoID },relations:['product']
       });
       if (!video) throw new NotFoundException('video not found');
+
+      if (video.product){
+        video.product.video = null
+        await this.productRepo.save(video.product)
+      }
 
       await this.videorepo.remove(video);
 
@@ -209,6 +214,8 @@ export class ProductMgtService {
       product.productImages = imagefileUrls;
       product.price = dto.price;
       product.stock = dto.stock;
+      product.wholesalePrice = dto.wholesalePrice
+      product.minWholesaleQuantity = dto.minWholesaleQuantity
       product.available_colors = dto.available_colors
       product.available_sizes = dto.available_sizes
       product.hasTax = dto.hasTax ?? false
@@ -286,6 +293,8 @@ export class ProductMgtService {
       product.price = dto.price;
       product.stock = dto.stock;
       product.productImages = imagefileUrls;
+      product.wholesalePrice = dto.wholesalePrice
+      product.minWholesaleQuantity = dto.minWholesaleQuantity
       product.hasTax = dto.hasTax
       product.taxRate = dto.taxRate
 
@@ -334,12 +343,17 @@ export class ProductMgtService {
   async TakeDownAProduct(productID: number) {
     try {
       const products = await this.productRepo.findOne({
-        where: { id: productID },
+        where: { id: productID },relations:['category']
       });
       if (!products)
         throw new NotFoundException(
           'no products have been posted at the moment',
         );
+
+        if (products.category){
+          products.category.products = null
+          await this.categoryRepo.save(products.category)
+        }
 
       await this.productRepo.remove(products);
 
@@ -545,11 +559,16 @@ export class ProductMgtService {
   async DeleteCategory(categoryID: number) {
     try {
       const categories = await this.categoryRepo.findOne({
-        where: { id: categoryID },
+        where: { id: categoryID },relations:['products']
       });
 
       if (!categories)
         throw new NotFoundException(' there are no category with the id found');
+
+      if (categories.products){
+        categories.products = null
+        await this.productRepo.save(categories.products)
+      }
 
       await this.categoryRepo.remove(categories);
 
