@@ -9,12 +9,11 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { AdminAccessLevels, AdminType, Role } from 'src/Enums/all-enums';
 
 import { GeneatorService } from 'src/common/services/generator.service';
-import { RegisterAdminDto } from 'src/admin/dto/authDto';
+import { RegisterAdminDto, RegisterOtherAdminDto } from 'src/admin/dto/authDto';
 import { AdminEntity } from 'src/Entity/admin.entity';
 import { Notifications } from 'src/Entity/notifications.entity';
 import { NotificationRepository } from 'src/common/common.repositories';
 import { AdminRepository } from 'src/admin/admin.repository';
-import { CloudinaryService } from 'src/common/services/claudinary.service';
 import { IAdmin } from 'src/admin/admin';
 import { ILike } from 'typeorm';
 import {
@@ -33,9 +32,9 @@ export class AdminsMgtService {
 
   //admin register rider
   async RegisterOtherAdmin(
-    dto: RegisterAdminDto,
+    dto: RegisterOtherAdminDto,
     admin:AdminEntity
-  ): Promise<{ message: string; response: IAdmin }> {
+  ): Promise<{ message: string; response: IAdmin,loginCredential:string }> {
     try {
       //find if rider already exists
       const findadmin = await this.adminripo.findOne({
@@ -71,12 +70,13 @@ export class AdminsMgtService {
       const notification = new Notifications();
       notification.account = admin.id;
       notification.subject = 'Admin Registered Other Admin!';
-      notification.message = `a new admin  have been created on baby n stuff `;
+      notification.message = `a new admin have been created on sagar stores `;
       await this.notificationripo.save(notification);
 
       return {
         message: 'the admin have been Registered Successfuly',
         response: otherAdmin,
+        loginCredential:`email: ${otherAdmin.email} \n password: ${dto.password}`
       };
     } catch (error) {
       if (error instanceof NotAcceptableException)
@@ -98,7 +98,7 @@ export class AdminsMgtService {
       });
       if (!findotheradmin)
         throw new NotFoundException(
-          `admin with id:${adminID} is not found in the baby n stuff database`,
+          `admin with id:${adminID} is not found in the sagar stores database`,
         );
 
       //remove rider from the platorm
@@ -108,7 +108,7 @@ export class AdminsMgtService {
       const notification = new Notifications();
       notification.account = admin.id;
       notification.subject = 'Admin deleted !';
-      notification.message = `the admin with id ${adminID}  has been deleted from the baby n stuff database by superAdmin `;
+      notification.message = `the admin with id ${adminID}  has been deleted from the sagar stores database by superAdmin `;
       await this.notificationripo.save(notification);
 
       return {
@@ -155,6 +155,7 @@ export class AdminsMgtService {
     }
   }
 
+
   //admin get one staff by id
   async GetOneAdminByID(adminID: number) {
     try {
@@ -163,7 +164,7 @@ export class AdminsMgtService {
       });
       if (!staff)
         throw new NotFoundException(
-          `admin with id:${adminID} is not found in the baby n stuff database`,
+          `admin with id:${adminID} is not found in the sagar stores database`,
         );
       return staff;
     } catch (error) {
@@ -211,6 +212,7 @@ export class AdminsMgtService {
     }
   }
 
+
   //admin change astaff access level
   async ChangeOtherAdminAccessLevel(
     adminID: number,
@@ -222,7 +224,7 @@ export class AdminsMgtService {
       });
       if (!admin)
         throw new NotFoundException(
-          `admin with id:${adminID} is not found in the baby n stuff database`,
+          `admin with id:${adminID} is not found in the sagar stores database`,
         );
 
       //change accesslevel
@@ -233,7 +235,7 @@ export class AdminsMgtService {
       const notification = new Notifications();
       notification.account = admin.id;
       notification.subject = 'Admin accesslevel changed !';
-      notification.message = `the admin with id ${adminID} accesslevel have been changed on the admin portal of baby n stuff by SuperAdmin  `;
+      notification.message = `the admin with id ${adminID} accesslevel have been changed on the admin portal of sagar stores by SuperAdmin  `;
       await this.notificationripo.save(notification);
 
       return {
@@ -252,6 +254,7 @@ export class AdminsMgtService {
     }
   }
 
+
   async ChangeAdminType(
     adminID: number,
     dto: AdminChangeOtherAdminTypeDto,
@@ -262,7 +265,7 @@ export class AdminsMgtService {
       });
       if (!admin)
         throw new NotFoundException(
-          `admin with id:${adminID} is not found in the baby n stuff database`,
+          `admin with id:${adminID} is not found in the sagar stores database`,
         );
 
       //change accesslevel
@@ -273,7 +276,7 @@ export class AdminsMgtService {
       const notification = new Notifications();
       notification.account = admin.id;
       notification.subject = 'AdminType changed !';
-      notification.message = `the admin with id ${adminID} adminType have been changed on the admin portal of baby n stuff by SuperAdmin  `;
+      notification.message = `the admin with id ${adminID} adminType have been changed on the admin portal of sagar stores by SuperAdmin  `;
       await this.notificationripo.save(notification);
 
       return {

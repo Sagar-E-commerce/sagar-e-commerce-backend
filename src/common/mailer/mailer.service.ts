@@ -19,7 +19,7 @@ export class Mailer {
     otpCode: string,
     expires: Date,
   ): Promise<void> {
-    const subject = 'Two factor Verification for Baby n Stuff';
+    const subject = 'Two factor Verification for Sagar Stores';
     const content = `<!DOCTYPE html>
       <html lang="en">
       <head>
@@ -88,7 +88,7 @@ export class Mailer {
       <body>
         <div class="container">
           <div class="logo">
-          <h1> Baby n Stuff </h1>
+          <h1> Sagar Stores </h1>
           </div>
           <h1 class="verification-heading">Dear, ${name}!</h1>
           <p class="message">TWO STEP VERIFICATION:</p>
@@ -100,7 +100,7 @@ export class Mailer {
           <p>If you did not request this OTP, please ignore this email.</p>
             
           </div>
-          <p class="footer">Baby n Stuff </p>
+          <p class="footer">Sagar Stores </p>
         </div>
       </body>
       </html>
@@ -179,7 +179,7 @@ export class Mailer {
         <body>
           <div class="container">
             <div class="logo">
-            <h1> BABY N' STUFF </h1>
+            <h1> Sagar Stores </h1>
             </div>
               
             <h1 class="verification-heading">Password Reset Token</h1>
@@ -187,7 +187,7 @@ export class Mailer {
             <p class="otp">Your Password Reset Token : <span class="otp-code">${resettoken}</span></p>
             <div class="instructions">
               <p>
-                We are sorry you couldn't get access into Baby n Stuff E-commerce Platform.  Please use the Reset Token  provided above to enter a new password.
+                We are sorry you couldn't get access into Sagar Stores Single Vendor E-commerce Platform.  Please use the Reset Token  provided above to enter a new password.
               </p>
               <p>
                 The password reset token is valid for a limited time, and it should be used to complete the password reset process.
@@ -196,10 +196,10 @@ export class Mailer {
                 If you did not request this reset link, please ignore this email. Your account will remain secure.
               </p>
               <p >
-              For any questions or assistance, contact our support team at <a class="button" href="mailto:nedunestjs@gmail.com">support@BabynStuff.com</a>
+              For any questions or assistance, contact our support team at <a class="button" href="mailto:nedunestjs@gmail.com">support@sagarstores.com</a>
               </p>
             </div>
-            <p class="footer">Baby n Stuff</p>
+            <p class="footer">Sagar Stores</p>
           </div>
         </body>
       </html>
@@ -208,12 +208,12 @@ export class Mailer {
     await this.mailerservice.sendMail({ to: email, subject, html: content });
   }
 
-  async WelcomeMail(email: string, name: string, promocode:string): Promise<void> {
-    const subject = 'Welcome To Baby n Stuff';
+  async WelcomeMail(email: string, name: string): Promise<void> {
+    const subject = 'Welcome To Sagar Stores';
     const content = `<!DOCTYPE html>
     <html>
       <head>
-        <title>Welcome to Baby n Stuff</title>
+        <title>Welcome to Sagar Stores</title>
         <style>
           body {
             font-family: Arial, sans-serif;
@@ -271,12 +271,12 @@ export class Mailer {
           <h1 class="verification-heading">Welcome OnBoard!</h1>
           <p class="message"><span class="username">HI ${name},</span></p>
           <div class="instructions">
-            <p>We are thrilled to have you join our platform. With Baby n Stuff, you can easily Browse for amazing Baby Products, track orders in real-time, and more.</p>
+            <p>We are thrilled to have you join our platform. With Sagar Stores, you can easily Browse for amazing Smart device Accessories and  Smart Devices, track orders in real-time, and more.</p>
             <p>If you have any questions or need assistance, feel free to reach out to our support team.</p>
             <p>Happy Purchasing!</p>
-            <p>For any questions or assistance, contact our support team at <a class="button" href="mailto:nedunestjs@gmail.com">support@BabynStuff.com</a></p>
+            <p>For any questions or assistance, contact our support team at <a class="button" href="mailto:nedunestjs@gmail.com">support@sagarstores.com</a></p>
           </div>
-          <p class="footer">Baby n Stuff</p>
+          <p class="footer">Sagar Stores</p>
         </div>
       </body>
     </html>
@@ -286,11 +286,11 @@ export class Mailer {
   }
   
   async WelcomeMailAdmin(email: string, name: string): Promise<void> {
-    const subject = 'Welcome To Baby n Stuff';
+    const subject = 'Welcome To Sagar Stores';
     const content = `<!DOCTYPE html>
     <html>
       <head>
-        <title>Welcome to Baby n' Stuff</title>
+        <title>Welcome to Sagar Stores</title>
         <style>
           body {
             font-family: Arial, sans-serif;
@@ -348,12 +348,12 @@ export class Mailer {
           <h1 class="verification-heading">Welcome OnBoard!</h1>
           <p class="message"><span class="username">HI ${name},</span></p>
           <div class="instructions">
-            <p>We are thrilled to have you join our platform. With Baby n Stuff, you can easily browse and purchase amazing Baby Products, track orders in real-time, and more.</p>
+            <p>We are thrilled to have you join our platform. With Sagar Stores, you can easily browse and purchase amazing Smart devices Accessories and Smart Devices, track orders in real-time, and more.</p>
             <p>If you have any questions or need assistance, feel free to reach out to our support team.</p>
             <p>Happy Purchasing!</p>
-            <p>For any questions or assistance, contact our support team at <a class="button" href="mailto:nedunestjs@gmail.com">support@BabynStuff.com</a></p>
+            <p>For any questions or assistance, contact our support team at <a class="button" href="mailto:nedunestjs@gmail.com">sagarstores.com</a></p>
           </div>
-          <p class="footer">Baby n Stuff</p>
+          <p class="footer">Sagar Stores</p>
         </div>
       </body>
     </html>
@@ -370,7 +370,7 @@ export class Mailer {
     orderID:string
   
   ): Promise<void> {
-    const subject = 'Order Details From Baby n Stuff';
+    const subject = 'Order Details From Sagar Stores';
     const content = `<!DOCTYPE html>
   <html>
     <head>
@@ -434,7 +434,7 @@ export class Mailer {
     <body>
       <div class="container">
         <div class="logo">
-        <h1> BABY N' STUFF </h1>
+        <h1> Sagar Stores </h1>
         </div>
           
         <h1 class="verification-heading">Order Details!</h1>
@@ -442,14 +442,14 @@ export class Mailer {
         
         <div class="instructions">
         <p>We are excited to inform you that your payment has been successfully made for order ID: ${orderID}.</p>
-<p>A tracking ID has been generated for your order, and a drop-off code has also been provided. Please use the following details:</p>
+<p>A tracking ID has been generated for your order. Please use the following details:</p>
 <p>Tracking ID: ${trackingID}</p>
-<p>Thank you for choosing Baby n Stuff. Happy Purchasing!</p></p>
+<p>Thank you for choosing Sagar Stores. Happy Purchasing!</p></p>
           <p >
-          For any questions or assistance, contact our support team at <a class="button" href="mailto:nedunestjs@gmail.com">support@babynStuff.com</a>
+          For any questions or assistance, contact our support team at <a class="button" href="mailto:nedunestjs@gmail.com">support@sagarstores.com</a>
           </p>
         </div>
-        <p class="footer">Baby n' Stuff</p>
+        <p class="footer">Sagar Stores</p>
       </div>
     </body>
   </html>
@@ -465,7 +465,7 @@ export class Mailer {
     trackingID: string,
     
   ): Promise<void> {
-    const subject = 'Parcel DropOff Confirmation By Baby n Stuff';
+    const subject = 'Parcel DropOff Confirmation By Sagar Stores';
     const content = `<!DOCTYPE html>
   <html>
     <head>
@@ -538,13 +538,13 @@ export class Mailer {
         <div class="instructions">
         <p>We are pleased to confirm that your order with tracking ID: ${trackingID} has been successfully delivered.</p>
 <p>If you have any feedback or concerns regarding your delivery experience, please don't hesitate to reach out to us.</p>
-<p>Thank you for choosing Baby n Stuff.</p>
+<p>Thank you for choosing Sagar Stores.</p>
 
           <p >
-          For any questions or assistance, contact our support team at <a class="button" href="mailto:nedunestjs@gmail.com">support@BabynStuff.com</a>
+          For any questions or assistance, contact our support team at <a class="button" href="mailto:nedunestjs@gmail.com">support@sagarstores.com</a>
           </p>
         </div>
-        <p class="footer">Baby n Stuff</p>
+        <p class="footer">Sagar Stores</p>
       </div>
     </body>
   </html>

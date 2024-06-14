@@ -13,7 +13,7 @@ import { AdminEntity } from 'src/Entity/admin.entity';
 import { AdminRepository } from './admin.repository';
 import { GeneatorService } from 'src/common/services/generator.service';
 import { IAdmin } from './admin';
-import { AdminType } from 'src/Enums/all-enums';
+import { AdminAccessLevels, AdminType } from 'src/Enums/all-enums';
 import { RegisterAdminDto } from './dto/authDto';
 import { UserOtp } from 'src/Entity/otp.entity';
 import {
@@ -85,8 +85,8 @@ export class AdminAuthService {
       admin.mobile = dto.mobile;
       admin.fullname = dto.fullname;
       admin.password = hashedpassword;
-      admin.adminaccessLevel = dto.accesslevel
-      admin.admintype = dto.adminType
+      admin.adminaccessLevel = AdminAccessLevels.LEVEL3
+      admin.admintype = AdminType.SUPERADMIN
       admin.RegisteredAt = new Date();
       admin.isRegistered = true;
 
@@ -123,7 +123,7 @@ export class AdminAuthService {
 
       return {
         message:
-          'You have successfully being registered as a SuperAdmin',
+          'You have successfully being registered as a SuperAdmin,please check your email for the otp verification',
       };
     } catch (error) {
       if (error instanceof NotFoundException)

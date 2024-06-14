@@ -406,6 +406,7 @@ export class ProductMgtService {
     }
   }
 
+
   //fetch all products
   async fetchOneProduct(productID: number) {
     try {
@@ -431,8 +432,13 @@ export class ProductMgtService {
     }
   }
 
-  async createCategory(dto: CreateCategoryDto): Promise<ICategory> {
+
+  async createCategory(dto: CreateCategoryDto, file:Express.Multer.File): Promise<ICategory> {
     try {
+
+      const display_pics = await this.cloudinaryservice.uploadFile(file);
+        const categorybanner = display_pics.secure_url
+  
       //check for name uniqueness
       const categoryName = await this.categoryRepo.findOne({
         where: { name: dto.name },
@@ -447,6 +453,7 @@ export class ProductMgtService {
       category.description = dto.description;
       category.name = dto.name;
       category.createdAT = new Date();
+      category.banner = categorybanner
       await this.categoryRepo.save(category);
 
       //save the notification
@@ -468,11 +475,20 @@ export class ProductMgtService {
       }
     }
   }
+
+
   async updateCategory(
     dto: UpdateCategoryDto,
     categoryID: number,
+    file:Express.Multer.File
   ): Promise<ICategory> {
     try {
+
+      let bannerurl: string | null = null;
+      if (file) {
+        const display_pics = await this.cloudinaryservice.uploadFile(file);
+        bannerurl = display_pics.secure_url;
+      }
       //check for name uniqueness
       const category = await this.categoryRepo.findOne({
         where: { id: categoryID },
@@ -483,6 +499,7 @@ export class ProductMgtService {
 
       category.description = dto.description;
       category.name = dto.name;
+      category.banner = bannerurl
       category.updatedAT = new Date();
 
       await this.categoryRepo.save(category);
@@ -556,6 +573,7 @@ export class ProductMgtService {
   }
 
 
+  
   async DeleteCategory(categoryID: number) {
     try {
       const categories = await this.categoryRepo.findOne({

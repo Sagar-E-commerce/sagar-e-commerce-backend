@@ -8,13 +8,44 @@ export class RegisterAdminDto{
     email:string
 
 
-    @IsEnum(AdminType)
+    @IsString()
     @IsNotEmpty()
-    adminType:AdminType
+    fullname:string
 
-    @IsEnum(AdminAccessLevels)
+    @IsString()
     @IsNotEmpty()
-    accesslevel:AdminAccessLevels
+    mobile:string
+
+    @IsString()
+    @IsOptional()
+    Nationality:string
+
+
+
+    @IsString()
+    @IsNotEmpty()
+    @IsStrongPassword({
+        minLength:8,
+        minLowercase:1,
+        minNumbers:1,
+        minSymbols:1,
+        minUppercase:1
+    })
+    password :string
+
+    @IsString()
+    @IsNotEmpty()
+    @Match('password', { message: 'ConfirmPassword does not match the password.' })
+    confirmPassword:string 
+
+
+}
+
+export class RegisterOtherAdminDto{
+    @IsEmail()
+    @IsNotEmpty()
+    email:string
+
 
     @IsString()
     @IsNotEmpty()
@@ -29,6 +60,13 @@ export class RegisterAdminDto{
     Nationality:string
 
 
+    @IsEnum(AdminType)
+    @IsNotEmpty()
+    adminType:AdminType
+
+    @IsEnum(AdminAccessLevels)
+    @IsNotEmpty()
+    accesslevel:AdminAccessLevels
 
     @IsString()
     @IsNotEmpty()

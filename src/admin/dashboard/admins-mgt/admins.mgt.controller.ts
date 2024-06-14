@@ -11,7 +11,7 @@ import { AdminTypes } from "src/auth/decorator/admintype.decorator";
 import { AdminAcessLevelGuard } from "src/auth/guard/accesslevel.guard";
 import { AdminAccessLevel } from "src/auth/decorator/accesslevel.decorator";
 import { AdminsMgtService } from "./admins.mgt.service";
-import { RegisterAdminDto } from "src/admin/dto/authDto";
+import { RegisterAdminDto, RegisterOtherAdminDto } from "src/admin/dto/authDto";
 import { AdminChangeOtherAdminTypeDto, AdminchangeOtherAdminAccessLevelDto } from "src/admin/dto/otherDto";
 
 @UseGuards(JwtGuard,RoleGuard,AdminTypeGuard,AdminTypeGuard,AdminAcessLevelGuard)
@@ -22,12 +22,12 @@ import { AdminChangeOtherAdminTypeDto, AdminchangeOtherAdminAccessLevelDto } fro
 export class AdminMgtController{
     constructor(private readonly adminsmgtservice:AdminsMgtService){}
 
+
     @AdminAccessLevel(AdminAccessLevels.LEVEL3,AdminAccessLevels.LEVEL2)
     @Post('/register')
-    async AdminRegisterStaff(@Body()dto:RegisterAdminDto,@Req()req){
+    async AdminRegisterStaff(@Body()dto:RegisterOtherAdminDto,@Req()req){
         return await this.adminsmgtservice.RegisterOtherAdmin(dto,req.user)
 
-        
     }
 
 
@@ -37,9 +37,7 @@ export class AdminMgtController{
         return await this.adminsmgtservice.AdminDeleteOtherAdmin(adminID,req.user)
     }
 
-
    
-
     @AdminAccessLevel(AdminAccessLevels.LEVEL3,AdminAccessLevels.LEVEL2)
     @Get('/all-other-admins')
     async GetAllStaffs(@Query('page')page:number, @Query('limit')limit:number){

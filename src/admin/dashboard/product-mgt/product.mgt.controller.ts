@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Put, Query, UploadedFiles, UseGuards, UseInterceptors } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, Patch, Post, Put, Query, UploadedFile, UploadedFiles, UseGuards, UseInterceptors } from "@nestjs/common";
 import { ProductMgtService } from "./product.mgt.service";
 import { CreateCategoryDto, CreateProductDto, UpdateCategoryDto, UpdateProductDto, uploadVideoDto } from "src/admin/dto/otherDto";
 import { FileInterceptor, FilesInterceptor } from "@nestjs/platform-express";
@@ -72,13 +72,15 @@ export class ProductMgtController{
 
 
     @Post('new-product-category')
-    async CreateNewProductCategory(@Body()dto:CreateCategoryDto){
-        return await this.productngtservice.createCategory(dto)
+    @UseInterceptors(FilesInterceptor('banner'))
+    async CreateNewProductCategory(@Body()dto:CreateCategoryDto, @UploadedFile()file:Express.Multer.File){
+        return await this.productngtservice.createCategory(dto,file)
     }
 
     @Patch('update-product-category/:categoryID')
-    async UpdateProductCategory(@Body()dto:UpdateCategoryDto, @Param('categoryID')categoryID:number){
-        return await this.productngtservice.updateCategory(dto,categoryID)
+    @UseInterceptors(FilesInterceptor('banner'))
+    async UpdateProductCategory(@Body()dto:UpdateCategoryDto, @Param('categoryID')categoryID:number, @UploadedFile()file:Express.Multer.File){
+        return await this.productngtservice.updateCategory(dto,categoryID,file)
     }
 
     @Get('fetch-all-product-category')
