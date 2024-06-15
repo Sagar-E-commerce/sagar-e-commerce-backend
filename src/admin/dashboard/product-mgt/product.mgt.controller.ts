@@ -72,13 +72,13 @@ export class ProductMgtController{
 
 
     @Post('new-product-category')
-    @UseInterceptors(FilesInterceptor('banner'))
+    @UseInterceptors(FileInterceptor('banner'))
     async CreateNewProductCategory(@Body()dto:CreateCategoryDto, @UploadedFile()file:Express.Multer.File){
         return await this.productngtservice.createCategory(dto,file)
     }
 
     @Patch('update-product-category/:categoryID')
-    @UseInterceptors(FilesInterceptor('banner'))
+    @UseInterceptors(FileInterceptor('banner'))
     async UpdateProductCategory(@Body()dto:UpdateCategoryDto, @Param('categoryID')categoryID:number, @UploadedFile()file:Express.Multer.File){
         return await this.productngtservice.updateCategory(dto,categoryID,file)
     }

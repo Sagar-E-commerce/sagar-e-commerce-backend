@@ -54,10 +54,6 @@ export class CreateProductDto{
     @Transform(({ value }) => parseFloat(value))
     price:number
 
-    @IsOptional()
-    @IsArray()
-    productImages:string[]
-
 
     @IsNotEmpty()
     @IsNumber()
@@ -116,10 +112,6 @@ export class UpdateProductDto{
     @IsNumber()
     @Transform(({ value }) => parseFloat(value))
     price:number
-
-    @IsOptional()
-    @IsArray()
-    productImages:string[]
 
 
     @IsOptional()

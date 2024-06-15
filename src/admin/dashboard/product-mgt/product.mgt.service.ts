@@ -43,7 +43,7 @@ export class ProductMgtService {
     private readonly categoryRepo: CategoryRepository,
     private uploadservice: UploadService,
     private generatorservice: GeneatorService,
-    private cloudinaryservice:CloudinaryService
+    private cloudinaryservice: CloudinaryService,
   ) {}
 
   async UploadProductVidoes(
@@ -58,7 +58,9 @@ export class ProductMgtService {
         relations: ['video'],
       });
       if (!product)
-        throw new NotFoundException(`product with ${dto.productID} is not found`);
+        throw new NotFoundException(
+          `product with ${dto.productID} is not found`,
+        );
 
       const videofileUrls: string[] = [];
       const thumbnailUrls: string[] = [];
@@ -84,25 +86,32 @@ export class ProductMgtService {
       //   }
       // }
 
-        // Handle video file uploads with cloudinary
-        for (const vidfile of videofiles) {
-          try {
-            const result = await this.cloudinaryservice.uploadVideoFile(vidfile);
-            videofileUrls.push(result.secure_url);
-            Videoduration = result.duration;
-            videoType = result.format; 
-          } catch (error) {
-            throw new InternalServerErrorException('Failed to upload video file', error.message);
-          }
+      // Handle video file uploads with cloudinary
+      for (const vidfile of videofiles) {
+        try {
+          const result = await this.cloudinaryservice.uploadVideoFile(vidfile);
+          videofileUrls.push(result.secure_url);
+          Videoduration = result.duration;
+          videoType = result.format;
+        } catch (error) {
+          throw new InternalServerErrorException(
+            'Failed to upload video file',
+            error.message,
+          );
         }
+      }
 
-           // Handle thumbnail uploads
+      // Handle thumbnail uploads
       for (const thumbFile of thumbnailFiles) {
         try {
-          const result = await this.cloudinaryservice.uploadThumbnail(thumbFile);
+          const result =
+            await this.cloudinaryservice.uploadThumbnail(thumbFile);
           thumbnailUrls.push(result.secure_url);
         } catch (error) {
-          throw new InternalServerErrorException('Failed to upload thumbnail', error.message);
+          throw new InternalServerErrorException(
+            'Failed to upload thumbnail',
+            error.message,
+          );
         }
       }
 
@@ -124,7 +133,8 @@ export class ProductMgtService {
       else {
         console.log(error);
         throw new InternalServerErrorException(
-          'something went wrong while trying to upload a product video ',error.message,
+          'something went wrong while trying to upload a product video ',
+          error.message,
         );
       }
     }
@@ -134,13 +144,14 @@ export class ProductMgtService {
   async TakeDownVideo(videoID: string) {
     try {
       const video = await this.videorepo.findOne({
-        where: { id: videoID },relations:['product']
+        where: { id: videoID },
+        relations: ['product'],
       });
       if (!video) throw new NotFoundException('video not found');
 
-      if (video.product){
-        video.product.video = null
-        await this.productRepo.save(video.product)
+      if (video.product) {
+        video.product.video = null;
+        await this.productRepo.save(video.product);
       }
 
       await this.videorepo.remove(video);
@@ -159,7 +170,6 @@ export class ProductMgtService {
       }
     }
   }
-
 
   //fetch all products
   async fetchAllVideos(page: number = 1, limit: number = 30) {
@@ -182,7 +192,8 @@ export class ProductMgtService {
       else {
         console.log(error);
         throw new InternalServerErrorException(
-          'something went wrong while trying to fetch all products ',error.message,
+          'something went wrong while trying to fetch all products ',
+          error.message,
         );
       }
     }
@@ -195,16 +206,20 @@ export class ProductMgtService {
     try {
       const imagefileUrls: string[] = [];
 
-          // Handle image file uploads to Cloudinary
-          for (const file of imagefiles) {
-            try {
-              const result: UploadApiResponse = await this.cloudinaryservice.uploadFile(file);
-              imagefileUrls.push(result.secure_url);
-            } catch (error) {
-              console.log(error);
-              throw new InternalServerErrorException('Failed to upload image file', error.message);
-            }
-          }
+      // Handle image file uploads to Cloudinary
+      for (const file of imagefiles) {
+        try {
+          const result: UploadApiResponse =
+            await this.cloudinaryservice.uploadFile(file);
+          imagefileUrls.push(result.secure_url);
+        } catch (error) {
+          console.log(error);
+          throw new InternalServerErrorException(
+            'Failed to upload image file',
+            error.message,
+          );
+        }
+      }
 
       // create post
       const product = new ProductEntity();
@@ -214,12 +229,12 @@ export class ProductMgtService {
       product.productImages = imagefileUrls;
       product.price = dto.price;
       product.stock = dto.stock;
-      product.wholesalePrice = dto.wholesalePrice
-      product.minWholesaleQuantity = dto.minWholesaleQuantity
-      product.available_colors = dto.available_colors
-      product.available_sizes = dto.available_sizes
-      product.hasTax = dto.hasTax ?? false
-      product.taxRate = dto.taxRate ?? 1.0
+      product.wholesalePrice = dto.wholesalePrice;
+      product.minWholesaleQuantity = dto.minWholesaleQuantity;
+      product.available_colors = dto.available_colors;
+      product.available_sizes = dto.available_sizes;
+      product.hasTax = dto.hasTax ?? false;
+      product.taxRate = dto.taxRate ?? 1.0;
 
       // Find and set category
       if (dto.categoryId) {
@@ -258,7 +273,8 @@ export class ProductMgtService {
       else {
         console.log(error);
         throw new InternalServerErrorException(
-          'something went wrong while trying to post a product ',error.message,
+          'something went wrong while trying to post a product ',
+          error.message,
         );
       }
     }
@@ -293,10 +309,10 @@ export class ProductMgtService {
       product.price = dto.price;
       product.stock = dto.stock;
       product.productImages = imagefileUrls;
-      product.wholesalePrice = dto.wholesalePrice
-      product.minWholesaleQuantity = dto.minWholesaleQuantity
-      product.hasTax = dto.hasTax
-      product.taxRate = dto.taxRate
+      product.wholesalePrice = dto.wholesalePrice;
+      product.minWholesaleQuantity = dto.minWholesaleQuantity;
+      product.hasTax = dto.hasTax;
+      product.taxRate = dto.taxRate;
 
       // Find and set category
       if (dto.categoryId) {
@@ -333,7 +349,8 @@ export class ProductMgtService {
       else {
         console.log(error);
         throw new InternalServerErrorException(
-          'something went wrong while trying to update product details ',error.message,
+          'something went wrong while trying to update product details ',
+          error.message,
         );
       }
     }
@@ -343,17 +360,18 @@ export class ProductMgtService {
   async TakeDownAProduct(productID: number) {
     try {
       const products = await this.productRepo.findOne({
-        where: { id: productID },relations:['category']
+        where: { id: productID },
+        relations: ['category'],
       });
       if (!products)
         throw new NotFoundException(
           'no products have been posted at the moment',
         );
 
-        if (products.category){
-          products.category.products = null
-          await this.categoryRepo.save(products.category)
-        }
+      if (products.category) {
+        products.category.products = null;
+        await this.categoryRepo.save(products.category);
+      }
 
       await this.productRepo.remove(products);
 
@@ -373,7 +391,8 @@ export class ProductMgtService {
       else {
         console.log(error);
         throw new InternalServerErrorException(
-          'something went wrong while trying to fetch all products ',error.message,
+          'something went wrong while trying to fetch all products ',
+          error.message,
         );
       }
     }
@@ -386,7 +405,7 @@ export class ProductMgtService {
       const products = await this.productRepo.findAndCount({
         skip: skip,
         take: limit,
-        relations: ['video', 'category','favourites'],
+        relations: ['video', 'category', 'favourites'],
       });
       if (products[1] === 0)
         throw new NotFoundException(
@@ -400,19 +419,19 @@ export class ProductMgtService {
       else {
         console.log(error);
         throw new InternalServerErrorException(
-          'something went wrong while trying to fetch all products ',error.message,
+          'something went wrong while trying to fetch all products ',
+          error.message,
         );
       }
     }
   }
-
 
   //fetch all products
   async fetchOneProduct(productID: number) {
     try {
       const products = await this.productRepo.findOne({
         where: { id: productID },
-        relations: ['category', 'video','likes'],
+        relations: ['category', 'video', 'likes'],
       });
       if (!products)
         throw new NotFoundException(
@@ -426,19 +445,21 @@ export class ProductMgtService {
       else {
         console.log(error);
         throw new InternalServerErrorException(
-          'something went wrong while trying to fetch all products ',error.message,
+          'something went wrong while trying to fetch all products ',
+          error.message,
         );
       }
     }
   }
 
-
-  async createCategory(dto: CreateCategoryDto, file:Express.Multer.File): Promise<ICategory> {
+  async createCategory(
+    dto: CreateCategoryDto,
+    file: Express.Multer.File,
+  ): Promise<ICategory> {
     try {
-
       const display_pics = await this.cloudinaryservice.uploadFile(file);
-        const categorybanner = display_pics.secure_url
-  
+      const categorybanner = display_pics.secure_url;
+
       //check for name uniqueness
       const categoryName = await this.categoryRepo.findOne({
         where: { name: dto.name },
@@ -453,7 +474,7 @@ export class ProductMgtService {
       category.description = dto.description;
       category.name = dto.name;
       category.createdAT = new Date();
-      category.banner = categorybanner
+      category.banner = categorybanner;
       await this.categoryRepo.save(category);
 
       //save the notification
@@ -470,25 +491,19 @@ export class ProductMgtService {
       else {
         console.log(error);
         throw new InternalServerErrorException(
-          'something went wrong while trying to create product category ',error.message,
+          'something went wrong while trying to create product category ',
+          error.message,
         );
       }
     }
   }
 
-
   async updateCategory(
     dto: UpdateCategoryDto,
     categoryID: number,
-    file:Express.Multer.File
+    file: Express.Multer.File,
   ): Promise<ICategory> {
     try {
-
-      let bannerurl: string | null = null;
-      if (file) {
-        const display_pics = await this.cloudinaryservice.uploadFile(file);
-        bannerurl = display_pics.secure_url;
-      }
       //check for name uniqueness
       const category = await this.categoryRepo.findOne({
         where: { id: categoryID },
@@ -497,9 +512,14 @@ export class ProductMgtService {
 
       // updatecategory
 
+      // If a new file is provided, upload it and update the banner URL
+      if (file) {
+        const display_pics = await this.cloudinaryservice.uploadFile(file);
+        category.banner = display_pics.secure_url;
+      }
+
       category.description = dto.description;
       category.name = dto.name;
-      category.banner = bannerurl
       category.updatedAT = new Date();
 
       await this.categoryRepo.save(category);
@@ -517,7 +537,8 @@ export class ProductMgtService {
       else {
         console.log(error);
         throw new InternalServerErrorException(
-          'something went wrong while trying to update this  product category ',error.message,
+          'something went wrong while trying to update this  product category ',
+          error.message,
         );
       }
     }
@@ -542,13 +563,13 @@ export class ProductMgtService {
       else {
         console.log(error);
         throw new InternalServerErrorException(
-          'something went wrong while trying to fetch all products ',error.message,
+          'something went wrong while trying to fetch all products ',
+          error.message,
         );
       }
     }
   }
 
-  
   async getOneCategory(categoryID: number): Promise<ICategory> {
     try {
       const categories = await this.categoryRepo.findOne({
@@ -566,26 +587,26 @@ export class ProductMgtService {
       else {
         console.log(error);
         throw new InternalServerErrorException(
-          'something went wrong while trying to one product category ',error.message,
+          'something went wrong while trying to one product category ',
+          error.message,
         );
       }
     }
   }
 
-
-  
   async DeleteCategory(categoryID: number) {
     try {
       const categories = await this.categoryRepo.findOne({
-        where: { id: categoryID },relations:['products']
+        where: { id: categoryID },
+        relations: ['products'],
       });
 
       if (!categories)
         throw new NotFoundException(' there are no category with the id found');
 
-      if (categories.products){
-        categories.products = null
-        await this.productRepo.save(categories.products)
+      if (categories.products) {
+        categories.products = null;
+        await this.productRepo.save(categories.products);
       }
 
       await this.categoryRepo.remove(categories);
@@ -604,7 +625,8 @@ export class ProductMgtService {
       else {
         console.log(error);
         throw new InternalServerErrorException(
-          'something went wrong while trying to one product category ',error.message,
+          'something went wrong while trying to one product category ',
+          error.message,
         );
       }
     }
