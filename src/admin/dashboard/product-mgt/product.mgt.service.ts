@@ -201,32 +201,24 @@ export class ProductMgtService {
 
   async CreateProduct(
     dto: CreateProductDto,
-    imagefiles: Express.Multer.File[],
+    file: Express.Multer.File,
   ): Promise<IProduct> {
     try {
-      const imagefileUrls: string[] = [];
+    
 
       // Handle image file uploads to Cloudinary
-      for (const file of imagefiles) {
-        try {
-          const result: UploadApiResponse =
-            await this.cloudinaryservice.uploadFile(file);
-          imagefileUrls.push(result.secure_url);
-        } catch (error) {
-          console.log(error);
-          throw new InternalServerErrorException(
-            'Failed to upload image file',
-            error.message,
-          );
-        }
-      }
+      
+      const display_pics = await this.cloudinaryservice.uploadFile(file);
+      const productImage = display_pics.secure_url;
+
+    
 
       // create post
       const product = new ProductEntity();
       product.name = dto.name;
       product.productID = `#BnSPr${await this.generatorservice.generateProductID()}`;
       product.description = dto.description;
-      product.productImages = imagefileUrls;
+      product.productImage = productImage;
       product.price = dto.price;
       product.stock = dto.stock;
       product.wholesalePrice = dto.wholesalePrice;
@@ -284,7 +276,7 @@ export class ProductMgtService {
   async EditProductDetails(
     productID: number,
     dto: UpdateProductDto,
-    imagefiles: Express.Multer.File[],
+    file: Express.Multer.File,
   ): Promise<IProduct> {
     try {
       //find product
@@ -294,25 +286,25 @@ export class ProductMgtService {
       if (!product)
         throw new NotFoundException(`product with ${productID} is not found`);
 
-      const imagefileUrls: string[] = [];
-      // If new image files are provided, upload them and set the new URLs
-      if (Array.isArray(imagefiles) && imagefiles.length > 0) {
-        for (const file of imagefiles) {
-          const imageUrl = await this.uploadservice.uploadFile(file);
-          imagefileUrls.push(`${process.env.BASE_URL}public/${imageUrl}`);
-        }
-      }
+    
 
       //update product
+        // If a new file is provided, upload it and update the banner URL
+        if (file) {
+          const display_pics = await this.cloudinaryservice.uploadFile(file);
+          product.productImage = display_pics.secure_url;
+        }
       product.name = dto.name;
       product.description = dto.description;
       product.price = dto.price;
       product.stock = dto.stock;
-      product.productImages = imagefileUrls;
+     
       product.wholesalePrice = dto.wholesalePrice;
       product.minWholesaleQuantity = dto.minWholesaleQuantity;
       product.hasTax = dto.hasTax;
       product.taxRate = dto.taxRate;
+      product.available_colors = dto.available_colors;
+      product.available_sizes = dto.available_sizes;
 
       // Find and set category
       if (dto.categoryId) {

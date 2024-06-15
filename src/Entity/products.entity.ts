@@ -11,7 +11,7 @@ export interface IProduct{
     name:string
     price:number
     availability:ProductAvailability
-    productImages:string[]
+    productImage:string
     stock:number
     isOutOfStock:boolean
     description:string
@@ -57,8 +57,8 @@ export class ProductEntity implements IProduct{
     @Column({ nullable: true, }) 
     minWholesaleQuantity: number;
 
-    @Column({nullable:true,type:'simple-array'})
-    productImages: string[]
+    @Column({nullable:true})
+    productImage: string
 
 
     @Column({nullable:true})

@@ -154,6 +154,16 @@ export class UpdateProductDto{
     @Min(0)
     @Max(100)
     taxRate?:number
+
+    @IsArray()
+    @IsString()
+    @IsOptional()
+    available_sizes:string[]
+
+    @IsArray()
+    @IsString()
+    @IsOptional()
+    available_colors:string[]
 }
 
 export class updateOrderStatusDto{

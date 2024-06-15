@@ -42,16 +42,16 @@ export class ProductMgtController{
 
 
     @Post('new-product')
-    @UseInterceptors(FilesInterceptor('productimage',10))
-    async CreateNewProduct(@Body()dto:CreateProductDto, @UploadedFiles()files:Express.Multer.File[]){
-        return await this.productngtservice.CreateProduct(dto,files)
+    @UseInterceptors(FileInterceptor('image'))
+    async CreateNewProduct(@Body()dto:CreateProductDto, @UploadedFile()file:Express.Multer.File){
+        return await this.productngtservice.CreateProduct(dto,file)
     }
 
 
     @Patch('edit-product/:productID')
-    @UseInterceptors(FilesInterceptor('productimage',10))
-    async EditProductDetails(@Param('productID')productID:number,@Body()dto:UpdateProductDto, @UploadedFiles()files:Express.Multer.File[]){
-        return await this.productngtservice.EditProductDetails(productID,dto,files)
+    @UseInterceptors(FileInterceptor('image'))
+    async EditProductDetails(@Param('productID')productID:number,@Body()dto:UpdateProductDto, @UploadedFile()file:Express.Multer.File){
+        return await this.productngtservice.EditProductDetails(productID,dto,file)
     }
 
 
