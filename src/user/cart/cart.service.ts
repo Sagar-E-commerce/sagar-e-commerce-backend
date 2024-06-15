@@ -63,13 +63,6 @@ export class CartService {
       });
       if (!product) throw new NotFoundException('product not found');
 
-       // Check if the selected color and size are available
-       if (!product.available_colors.includes(dto.color)) {
-        throw new NotAcceptableException('Selected color is not available');
-      }
-      if (!product.available_sizes.includes(dto.size)) {
-        throw new NotAcceptableException('Selected size is not available');
-      }
 
       // Check if the product has enough stock
       if (product.stock < dto.quantity) {

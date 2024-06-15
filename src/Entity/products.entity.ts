@@ -24,8 +24,8 @@ export interface IProduct{
     minWholesaleQuantity: number;
     hasTax:boolean
     taxRate:number
-    available_sizes:string[]
-    available_colors:string[]
+    available_sizes:string
+    available_colors:string
     favourites: FavouriteEntity[]
     
 }
@@ -79,11 +79,11 @@ export class ProductEntity implements IProduct{
     @Column({nullable:true, type:'boolean'})
     isOutOfStock: boolean
 
-    @Column({type:'simple-array',nullable:true})
-    available_colors: string[]
+    @Column({nullable:true})
+    available_colors: string
 
-    @Column({type:'simple-array',nullable:true})
-    available_sizes: string[]
+    @Column({nullable:true})
+    available_sizes: string
 
     @Column({ default: 0 })
     purchaseCount: number;

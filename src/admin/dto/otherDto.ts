@@ -69,15 +69,15 @@ export class CreateProductDto{
     @IsString()
     name:string
 
-    @IsArray()
-    @IsString()
-    @IsOptional()
-    available_sizes:string[]
 
-    @IsArray()
     @IsString()
     @IsOptional()
-    available_colors:string[]
+    available_sizes:string
+
+
+    @IsString()
+    @IsOptional()
+    available_colors:string
 
 
     @IsNotEmpty()
@@ -155,15 +155,15 @@ export class UpdateProductDto{
     @Max(100)
     taxRate?:number
 
-    @IsArray()
+   
     @IsString()
     @IsOptional()
-    available_sizes:string[]
+    available_sizes:string
 
-    @IsArray()
+  
     @IsString()
     @IsOptional()
-    available_colors:string[]
+    available_colors:string
 }
 
 export class updateOrderStatusDto{
