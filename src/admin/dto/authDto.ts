@@ -38,6 +38,8 @@ export class RegisterAdminDto{
     @Match('password', { message: 'ConfirmPassword does not match the password.' })
     confirmPassword:string 
 
+  
+
 
 }
 

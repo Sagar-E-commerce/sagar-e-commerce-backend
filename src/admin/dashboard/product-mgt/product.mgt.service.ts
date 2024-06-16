@@ -596,9 +596,11 @@ export class ProductMgtService {
       if (!categories)
         throw new NotFoundException(' there are no category with the id found');
 
-      if (categories.products) {
-        categories.products = null;
-        await this.productRepo.save(categories.products);
+      if (categories.products && categories.products.length > 0) {
+        for (const product of categories.products) {
+          product.category = null;
+          await this.productRepo.save(product);
+        }
       }
 
       await this.categoryRepo.remove(categories);

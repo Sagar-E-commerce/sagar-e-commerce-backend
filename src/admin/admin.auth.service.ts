@@ -87,6 +87,7 @@ export class AdminAuthService {
       admin.password = hashedpassword;
       admin.adminaccessLevel = AdminAccessLevels.LEVEL3
       admin.admintype = AdminType.SUPERADMIN
+      admin.Nationality = dto.Nationality
       admin.RegisteredAt = new Date();
       admin.isRegistered = true;
 
