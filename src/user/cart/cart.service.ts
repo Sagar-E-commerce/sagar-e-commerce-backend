@@ -177,7 +177,7 @@ export class CartService {
     try {
       const cart = await this.cartRepo.findOne({
         where: { user: User, isCheckedOut: false },
-        relations: ['user', 'items'],
+        relations: ['user', 'items','items.product'],
       });
       if (!cart) throw new NotFoundException('cart not found');
       return cart;

@@ -516,7 +516,7 @@ export class BrowseService {
     try {
       const cart = await this.cartRepo.findOne({
         where: { id:cartId, isCheckedOut: false },
-        relations: ['user', 'items'],
+        relations: ['user', 'items','items.product'],
       });
       if (!cart) throw new NotFoundException('cart not found');
       return cart;
