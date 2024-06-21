@@ -49,7 +49,7 @@ import { FeddbackEntity } from 'src/Entity/feedback.entity';
 import { NewsLetterEntity } from 'src/Entity/newsletter.entity';
 import { IOrder } from '../order/order';
 import { Notifications } from 'src/Entity/notifications.entity';
-
+import { ShiprocketService } from 'src/common/services/shiprocket.service';
 @Injectable()
 export class BrowseService {
   constructor(
@@ -77,6 +77,9 @@ export class BrowseService {
     @InjectRepository(Notifications)
     private readonly notficationrepo: NotificationRepository,
     private orderservice: OrderService,
+    private shiprocketservice:ShiprocketService
+
+    
   ) {}
 
   //fetch all products
@@ -509,6 +512,27 @@ export class BrowseService {
     }
   }
 
+  async getCart(cartId:string): Promise<ICart> {
+    try {
+      const cart = await this.cartRepo.findOne({
+        where: { id:cartId, isCheckedOut: false },
+        relations: ['user', 'items'],
+      });
+      if (!cart) throw new NotFoundException('cart not found');
+      return cart;
+    } catch (error) {
+      if (error instanceof NotFoundException)
+        throw new NotFoundException(error.message);
+      else {
+        console.log(error);
+        throw new InternalServerErrorException(
+          'something went wrong while trying to fetch cart, please try again later',error.message
+        );
+      }
+    }
+  }
+
+
   async checkoutCart(cartID: string) {
     try {
       const cart = await this.cartRepo.findOne({
@@ -585,16 +609,12 @@ export class BrowseService {
       order.orderType = dto.orderType;
   
       // Handle payment methods
-      const payment = dto.paymentMethod;
-      if (
-        payment === paymentType.CARD ||
-        payment === paymentType.DIRECT_TRANSFER ||
-        payment === paymentType.PAY_ON_DELIVERY
-      ) {
-        await this.paymentservice.processGuestPayment(order, order.total,dto.email);
-      } else {
-        throw new NotAcceptableException('invalid payment method');
+      const payment = await this.paymentservice.PaymentService(order);
+
+      if (payment){
+        await this.shiprocketservice.recommendDispatchService(order)
       }
+     
   
       order.paymentMethod = payment;
       order.name = dto.name;
@@ -657,6 +677,7 @@ export class BrowseService {
     }
   }
 
+
   // subscribe for newsletter
   async SubsribeToNewsLetter(dto: NewsLetterDto) {
     try {
@@ -703,15 +724,8 @@ export class BrowseService {
       //provide feedback
       const feedback = new FeddbackEntity();
       feedback.email = dto.email;
-      (feedback.shoppingExperience = dto.shoppingExperience),
-        (feedback.additionalSatisfactionOrFeedback =
-          dto.additionalSatisfactionOrFeedBack);
-      feedback.categoryProductAvailabilitySatisfaction =
-        dto.categoryProductAvailability;
-      feedback.likelihoodOfWebSiteReccomendation =
-        dto.likelihoodofWebsiteReccomendation;
-      feedback.productAndImageDiscription = dto.productImageDescription;
-      feedback.productBrowsingExperience = dto.productBrowsingExperience;
+      feedback.shoppingExperience = dto.shoppingExperience,
+      feedback.additionalFeedback = dto.additionalFeedBack
       feedback.feedbackGivenAT = new Date();
 
       await this.feedbackripo.save(feedback);

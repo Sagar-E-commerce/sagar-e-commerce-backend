@@ -6,12 +6,7 @@ import { AdminAccessLevels, AdminType, OrderStatus, ProductAvailability } from "
 export class EditAdminProfileDto{
     @IsString()
     @IsOptional()
-    fisrtname: string;
-
-    @IsString()
-    @IsOptional()
-    lastname: string;
-
+    firstname: string;
 
     @IsEmail()
     @IsOptional()
@@ -32,8 +27,6 @@ export class EditAdminProfileDto{
     @IsString()
     @IsOptional()
     gender: string
-
-   
 
 }
 
@@ -65,6 +58,8 @@ export class CreateProductDto{
     @IsString()
     description:string
 
+
+
     @IsNotEmpty()
     @IsString()
     name:string
@@ -84,6 +79,11 @@ export class CreateProductDto{
     @IsNumber()
     @Transform(({ value }) => parseFloat(value))
     wholesalePrice:number
+
+    @IsOptional()
+    @IsNumber()
+    @Transform(({ value }) => parseFloat(value))
+    weight:number
 
     @IsNotEmpty()
     @IsNumber()
@@ -217,8 +217,6 @@ export class flatRateDto{
     @IsString()
     @IsOptional()
     currency:string
-
-
 
 }
 

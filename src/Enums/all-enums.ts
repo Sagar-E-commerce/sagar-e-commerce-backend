@@ -67,3 +67,9 @@ export enum LikelihoodOfWebsiteReccomendation{
   NEUTRAL ="Neutral",
   NOT_LIKELY ="Not Likely"
 }
+
+export enum PaymentGateways{
+  RAZORPAY="razorpay",
+  CASHFREE="cashfree",
+  PAYUMONEY="payUmoney"
+}

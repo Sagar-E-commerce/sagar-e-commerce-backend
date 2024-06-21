@@ -79,6 +79,15 @@ export class AddToCartDto {
     @IsEmail()
     @IsNotEmpty()
     email:string
+
+
+    @IsString()
+    @IsOptional()
+    dropOffpincode:string
+
+    
+
+
   }
 
   export class NewsLetterDto{
@@ -97,26 +106,10 @@ export class AddToCartDto {
     @IsNotEmpty()
     shoppingExperience:ShoppingExperience
 
-    @IsEnum(ProductBrowsingExperience)
-    @IsNotEmpty()
-    productBrowsingExperience:ProductBrowsingExperience
-
-    @IsEnum(ProductAndImageDiscription)
-    @IsNotEmpty()
-    productImageDescription:ProductAndImageDiscription
-
-    @IsEnum(CategoryProductAvailabilitySatisfaction)
-    @IsNotEmpty()
-    categoryProductAvailability:CategoryProductAvailabilitySatisfaction
-
-    @IsEnum(LikelihoodOfWebsiteReccomendation)
-    @IsNotEmpty()
-    likelihoodofWebsiteReccomendation:LikelihoodOfWebsiteReccomendation
 
     @IsString()
     @IsOptional()
-    additionalSatisfactionOrFeedBack:string
-
+    additionalFeedBack:string
     
   }
 

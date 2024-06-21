@@ -7,9 +7,12 @@ import { UploadService } from './services/upload.service';
 import { JwtService } from '@nestjs/jwt';
 import { CloudinaryConfig } from './config/claudinary.config';
 import { CloudinaryService } from './services/claudinary.service';
+import { ShiprocketService } from './services/shiprocket.service';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { OrderEntity } from 'src/Entity/order.entity';
 
 @Module({
-  imports: [],
+  imports: [TypeOrmModule.forFeature([OrderEntity])],
   providers: [
     GeneatorService,
     GeoCodingService,
@@ -18,6 +21,7 @@ import { CloudinaryService } from './services/claudinary.service';
     JwtService,
     CloudinaryConfig,
     CloudinaryService,
+    ShiprocketService
   ],
   exports: [CloudinaryService,CloudinaryConfig],
 })

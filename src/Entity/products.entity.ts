@@ -22,6 +22,7 @@ export interface IProduct{
     category: CategoryEntity;
     wholesalePrice: number;
     minWholesaleQuantity: number;
+    weight:number
     hasTax:boolean
     taxRate:number
     available_sizes:string
@@ -84,6 +85,9 @@ export class ProductEntity implements IProduct{
 
     @Column({nullable:true})
     available_sizes: string
+
+    @Column('decimal',{nullable:true})
+    weight:number
 
     @Column({ default: 0 })
     purchaseCount: number;

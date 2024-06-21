@@ -1,14 +1,13 @@
 import { Module } from '@nestjs/common';
 import { UserAuthController } from './user.auth.controller';
 import { ProfileMgtController } from './profile-mgt/profile-mgt.controller';
-import { PaymentgateWaysControllers } from './payment/payment-gateways.controller';
-import { WebhookControllers } from './payment/webhooks.controller';
+
 import { OrderController } from './order/order.controller';
 import { CartController } from './cart/cart.controller';
 import { UserAuthService } from './user.auth.service';
 import { ProfileMgtServices } from './profile-mgt/profile-mgt.service';
 import { PaymentGatewaysService } from './payment/payement-gatways.service';
-import { WebhookService } from './payment/webhooks.service';
+
 import { OrderService } from './order/order.service';
 import { CartService } from './cart/cart.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -34,6 +33,11 @@ import { FeddbackEntity } from 'src/Entity/feedback.entity';
 import { FavouriteEntity } from 'src/Entity/likes.entity';
 import { CurrencyController } from './currency-converter/converter.controller';
 import { CurrencyService } from './currency-converter/converter.service';
+import { ShiprocketService } from 'src/common/services/shiprocket.service';
+import { PaymentConfigurationEntity } from 'src/Entity/paymentConfig.entity';
+import { RazorPayPaymentGatewayService } from 'src/admin/dashboard/payment-config/razorpay.service';
+import { CashfreePaymentGatewayService } from 'src/admin/dashboard/payment-config/cashfree.service';
+import { PayUmoneyPaymentGatewayService } from 'src/admin/dashboard/payment-config/payumoney.service';
 
 @Module({
   imports: [
@@ -53,14 +57,13 @@ import { CurrencyService } from './currency-converter/converter.service';
       NewsLetterEntity,
       FeddbackEntity,
       FavouriteEntity,
-      ShippingFlatRateEntity
+      ShippingFlatRateEntity,
+      PaymentConfigurationEntity
     ]),
   ],
   controllers: [
     UserAuthController,
     ProfileMgtController,
-    PaymentgateWaysControllers,
-    WebhookControllers,
     OrderController,
     CartController,
     BrowseController,
@@ -70,7 +73,6 @@ import { CurrencyService } from './currency-converter/converter.service';
     UserAuthService,
     ProfileMgtServices,
     PaymentGatewaysService,
-    WebhookService,
     OrderService,
     CartService,
     GeneatorService,
@@ -79,7 +81,11 @@ import { CurrencyService } from './currency-converter/converter.service';
     Mailer,
     BrowseService,
     CloudinaryService,
-    CurrencyService
+    CurrencyService,
+    ShiprocketService,
+    RazorPayPaymentGatewayService,
+    CashfreePaymentGatewayService,
+    PayUmoneyPaymentGatewayService
   ],
 })
 export class UserModule {}

@@ -69,6 +69,15 @@ export class OrderEntity implements IOrder {
   @Column({nullable:true, type:"timestamp"})
   updatedAT: Date;
 
+  @Column({nullable:true})
+  dropoffpincode:string
+
+  @Column({nullable:true})
+  pickuppincode:string
+
+  @Column('decimal',{nullable:true})
+  weight: number
+
 
 }
 

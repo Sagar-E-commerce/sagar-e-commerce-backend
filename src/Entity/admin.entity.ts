@@ -34,6 +34,9 @@ export class AdminEntity implements IAdmin{
     @Column({nullable:true})
     fullname: string;
 
+    @Column({nullable:true})
+    home_address:string
+
     @Column({nullable:true,type:'timestamp'})
     UpdatedAt:Date
 

@@ -41,6 +41,7 @@ import { PaymentGatewaysService } from '../payment/payement-gatways.service';
 import { NewsLetterEntity } from 'src/Entity/newsletter.entity';
 import { FeddbackEntity } from 'src/Entity/feedback.entity';
 import { ShippingFlatRateRepository } from 'src/admin/admin.repository';
+import { ShiprocketService } from 'src/common/services/shiprocket.service';
 
 @Injectable()
 export class OrderService {
@@ -63,6 +64,7 @@ export class OrderService {
     private generatorservice: GeneatorService,
     private paymentservice: PaymentGatewaysService,
     private mailer: Mailer,
+    private shiprocketservice:ShiprocketService
   ) {}
 
   async GuestCreateOrderFromCart(cartID: string): Promise<IOrder> {
@@ -80,13 +82,18 @@ export class OrderService {
         throw new BadRequestException('Cart is empty');
       }
         
-      console.log('Calculating subtotal for cart items');
-      // Calculate the total of all items in the cart, including tax if applicable
-      const subtotal = cart.items.reduce((sum, item) => {
-        const productPrice = item.price * item.quantity;
-        const taxAmount = item.product.hasTax ? productPrice * (item.product.taxRate / 100) : 0;
-        return sum + productPrice + taxAmount;
-      }, 0);
+      console.log('Calculating subtotal and total weight for cart items');
+      // Calculate the total of all items in the cart, including tax if applicable, and total weight
+      const { subtotal, totalWeight } = cart.items.reduce(
+        (acc, item) => {
+          const productPrice = item.price * item.quantity;
+          const taxAmount = item.product.hasTax ? productPrice * (item.product.taxRate / 100) : 0;
+          acc.subtotal += productPrice + taxAmount;
+          acc.totalWeight += item.product.weight * item.quantity;
+          return acc;
+        },
+        { subtotal: 0, totalWeight: 0 }
+      );
 
 
       // Get the latest flat rate
@@ -102,6 +109,7 @@ export class OrderService {
       const order = this.orderRepo.create({
         orderID: `#BnsO-${await this.generatorservice.generateOrderID()}`,
         subTotal: subtotal,
+        weight:totalWeight,
         shippinFee: shippingFee,
         total: subtotal + shippingFee,
         isPaid: false,
@@ -170,13 +178,18 @@ export class OrderService {
         throw new BadRequestException('Cart is empty');
       }
 
-      console.log('Calculating subtotal for cart items');
-      // Calculate the total of all items in the cart, including tax if applicable
-      const subtotal = cart.items.reduce((sum, item) => {
-        const productPrice = item.price * item.quantity;
-        const taxAmount = item.product.hasTax ? productPrice * (item.product.taxRate / 100) : 0;
-        return sum + productPrice + taxAmount;
-      }, 0);
+      console.log('Calculating subtotal and total weight for cart items');
+      // Calculate the total of all items in the cart, including tax if applicable, and total weight
+      const { subtotal, totalWeight } = cart.items.reduce(
+        (acc, item) => {
+          const productPrice = item.price * item.quantity;
+          const taxAmount = item.product.hasTax ? productPrice * (item.product.taxRate / 100) : 0;
+          acc.subtotal += productPrice + taxAmount;
+          acc.totalWeight += item.product.weight * item.quantity;
+          return acc;
+        },
+        { subtotal: 0, totalWeight: 0 }
+      );
       // Get the latest flat rate      // Calculate the total of all items in the cart, including tax if applicable
 
       const [flatrate] = await this.flatrateripo.find({
@@ -195,6 +208,7 @@ export class OrderService {
         subTotal: subtotal,
         shippinFee: shippingFee,
         total: subtotal + shippingFee,
+        weight : totalWeight,
         isPaid: false,
         createdAT: new Date(),
         trackingID: `BnS-${await this.generatorservice.generateTrackingID()}`,
@@ -308,23 +322,21 @@ export class OrderService {
       order.orderType = dto.orderType;
   
       // Handle payment methods
-      const payment = dto.paymentMethod;
-      if (
-        payment === paymentType.CARD ||
-        payment === paymentType.DIRECT_TRANSFER ||
-        payment === paymentType.PAY_ON_DELIVERY
-      ) {
-        await this.paymentservice.processGuestPayment(order, order.total,dto.email);
-      } else {
-        throw new NotAcceptableException('invalid payment method');
-      }
-  
+        // Handle payment methods
+        const payment = await this.paymentservice.PaymentService(order);
+
+        if (payment){
+          await this.shiprocketservice.recommendDispatchService(order)
+        }
+     
+
 
       order.paymentMethod = payment;
       order.name = dto.name;
       order.mobile = dto.mobile;
       order.billing_address = dto.billing_address;
       order.email = dto.email;
+    
 
       await this.orderRepo.save(order);
 

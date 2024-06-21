@@ -69,6 +69,8 @@ export class BrowseController {
   }
 
 
+
+
   @Get('fetch-one-product/:productID')
   async FetchOneProduct(@Param('productID') productID: number) {
     return await this.browseservice.fetchOneProduct(productID);
@@ -155,6 +157,11 @@ export class BrowseController {
   @Post('guest-add-product-to-cart/:productID')
   async AddProductToCart(@Body()dto:AddToCartDto,@Param('productID')productID:number){
     return await this.browseservice.GuestAddToCart(productID,dto)
+  }
+
+  @Get('fetch-guest-cart/:cartId')
+  async getCart(@Param('cartId')cartId:string) {
+    return await this.browseservice.getCart(cartId);
   }
 
   @Delete('guest-remove-item-from-cart/:cartID/:cartItemID')

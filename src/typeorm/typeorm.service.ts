@@ -14,6 +14,7 @@ import { NewsLetterEntity } from 'src/Entity/newsletter.entity';
 import { Notifications } from 'src/Entity/notifications.entity';
 import { OrderEntity, OrderItemEntity } from 'src/Entity/order.entity';
 import { UserOtp } from 'src/Entity/otp.entity';
+import { PaymentConfigurationEntity } from 'src/Entity/paymentConfig.entity';
 import { CategoryEntity } from 'src/Entity/productCategory.entity';
 import { ProductEntity } from 'src/Entity/products.entity';
 import { UserEntity } from 'src/Entity/users.entity';
@@ -51,7 +52,8 @@ export class TypeOrmService {
         NewsLetterEntity,
         FeddbackEntity,
         ShippingFlatRateEntity,
-        FavouriteEntity
+        FavouriteEntity,
+        PaymentConfigurationEntity
       ],
       migrations: [],
       subscribers: [],

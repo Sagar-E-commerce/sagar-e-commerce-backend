@@ -39,7 +39,7 @@ import { EditAdminProfileDto } from 'src/admin/dto/otherDto';
     ): Promise<IAdmin> {
       try {
         admin.Nationality = dto.Nationality;
-        admin.fullname = dto.fisrtname;
+        admin.fullname = dto.firstname;
         admin.mobile = dto.mobile;
         admin.email = dto.email
         admin.Nationality = dto.Nationality;

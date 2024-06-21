@@ -34,6 +34,13 @@ import { NewsLetterEntity } from 'src/Entity/newsletter.entity';
 import { FeddbackEntity } from 'src/Entity/feedback.entity';
 import { AdminMgtController } from './dashboard/admins-mgt/admins.mgt.controller';
 import { AdminsMgtService } from './dashboard/admins-mgt/admins.mgt.service';
+import { PaymentConfigurationEntity } from 'src/Entity/paymentConfig.entity';
+import { RazorPayPaymentGatewayService } from './dashboard/payment-config/razorpay.service';
+import { CashfreePaymentGatewayService } from './dashboard/payment-config/cashfree.service';
+import { PayUmoneyPaymentGatewayService } from './dashboard/payment-config/payumoney.service';
+import { UpdatePaymentGatewayConfigService } from './dashboard/payment-config/update-payment.service';
+import { PaymentGateWayController } from './dashboard/payment-config/payment-config.controller';
+import { ShiprocketService } from 'src/common/services/shiprocket.service';
 
 @Module({
   imports: [
@@ -51,7 +58,9 @@ import { AdminsMgtService } from './dashboard/admins-mgt/admins.mgt.service';
       DiscountCouponEntity,
       ShippingFlatRateEntity,
       NewsLetterEntity,
-      FeddbackEntity
+      FeddbackEntity,
+      PaymentConfigurationEntity,
+      ShiprocketService
     ]),
   ],
   providers: [
@@ -68,7 +77,11 @@ import { AdminsMgtService } from './dashboard/admins-mgt/admins.mgt.service';
     CloudinaryService,
     JwtService,
     AdminProfileMgtServices,
-    AdminsMgtService
+    AdminsMgtService,
+    RazorPayPaymentGatewayService,
+    CashfreePaymentGatewayService,
+    PayUmoneyPaymentGatewayService,
+    UpdatePaymentGatewayConfigService
   ],
   controllers: [
     AdminAuthController,
@@ -78,7 +91,8 @@ import { AdminsMgtService } from './dashboard/admins-mgt/admins.mgt.service';
     OrderMgtcontroller,
     ProductMgtController,
     AdminProfileMgtController,
-    AdminMgtController
+    AdminMgtController,
+    PaymentGateWayController
   ],
 })
 export class AdminModule {}

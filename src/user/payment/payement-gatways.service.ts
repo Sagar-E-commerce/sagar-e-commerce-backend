@@ -10,138 +10,47 @@ import axios from 'axios';
 import { Notifications } from 'src/Entity/notifications.entity';
 import { NotificationRepository } from 'src/common/common.repositories';
 import { OrderEntity } from 'src/Entity/order.entity';
+import { CashfreePaymentGatewayService } from 'src/admin/dashboard/payment-config/cashfree.service';
+import { RazorPayPaymentGatewayService } from 'src/admin/dashboard/payment-config/razorpay.service';
+import { PayUmoneyPaymentGatewayService } from 'src/admin/dashboard/payment-config/payumoney.service';
+import { PaymentConfigurationEntity } from 'src/Entity/paymentConfig.entity';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class PaymentGatewaysService {
   constructor(
-    @InjectRepository(CartEntity) private readonly cartRepo: CartRepository,
     @InjectRepository(OrderEntity) private readonly orderRepo: OrderRepository,
     @InjectRepository(Notifications)
     private readonly notificationRepo: NotificationRepository,
+    @InjectRepository(PaymentConfigurationEntity)
+    private readonly paymentGatewayConfigRepo: Repository<PaymentConfigurationEntity>,
+    private cashfreepaymentservice:CashfreePaymentGatewayService,
+    private razorpaypaymentservice:RazorPayPaymentGatewayService,
+    private payumoneyservice:PayUmoneyPaymentGatewayService
   ) {}
 
-  //process payment with paystack
-  async processPayment(
-    my_order: OrderEntity,
-    totalamount: number,
-  ): Promise<PaymentResponse> {
-    try {
-      const order = await this.orderRepo.findOne({
-        where: { id: my_order.id },
-        relations: ['user', 'items'],
-      });
-      if (!order)
-        throw new NotFoundException(
-          `the order with the ID ${order.id} does not exist`,
-        );
-
-      // Paystack payment integration
-      const response = await axios.post(
-        'https://api.paystack.co/transaction/initialize',
-        {
-          amount: totalamount * 100, // Convert to kobo (Paystack currency)
-          email: order.user.email, // Customer email for reference
-          reference: order.id.toString(), // Order ID as payment reference
-          currency: 'NGN',
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${process.env.PAYSTACK_TEST_SECRET}`,
-            'Content-Type': 'application/json',
-          },
-        },
-      );
-
-      if (response.data.status === true) {
-        console.log('payment successful');
-      } else {
-        throw new InternalServerErrorException(
-          'Payment initialization failed. Please try again later',
-        );
-      }
-      //save the notification
-      const notification = new Notifications();
-      notification.account = order.user.id;
-      notification.subject = 'Payment Order initiated!';
-      notification.message = `the user with id ${order.user.id} have initiated payment `;
-      await this.notificationRepo.save(notification);
-
-      return response.data;
-    } catch (error) {
-      console.error(error);
-      let errorMessage = 'Payment processing failed. Please try again later';
-
-      // Handle specific Paystack errors (optional)
-      if (error.response && error.response.data) {
-        errorMessage = error.response.data.message;
-      }
-
-      throw new InternalServerErrorException(errorMessage);
-    }
+  async getConfig(): Promise<PaymentConfigurationEntity> {
+    const config = await this.paymentGatewayConfigRepo.findOne({});
+    if (!config)
+      throw new NotFoundException('Payment gateway config not found');
+    return config;
   }
 
+  async PaymentService(orderDetails: OrderEntity): Promise<any> {
+    const config = await this.getConfig();
 
-
-  //process guest payment with paystack
-  async processGuestPayment(
-    my_order: OrderEntity,
-    totalamount: number,
-    email:string
-  ): Promise<PaymentResponse> {
-    try {
-      const order = await this.orderRepo.findOne({
-        where: { id: my_order.id },
-        relations: ['items'],
-      });
-      if (!order)
-        throw new NotFoundException(
-          `the order with the ID ${order.id} does not exist`,
-        );
-
-
-      // Paystack payment integration
-      const response = await axios.post(
-        'https://api.paystack.co/transaction/initialize',
-        {
-          amount: totalamount * 100, // Convert to kobo (Paystack currency)
-          email: email, // Customer email for reference
-          reference: order.id.toString(), // Order ID as payment reference
-          currency: 'NGN',
-        },
-
-        {
-          headers: {
-            Authorization: `Bearer ${process.env.PAYSTACK_TEST_SECRET}`,
-            'Content-Type': 'application/json',
-          },
-        },
-      );
-
-      if (response.data.status === true) {
-        console.log('payment successful');
-      } else {
-        throw new InternalServerErrorException(
-          'Payment initialization failed. Please try again later',
-        );
-      }
-      //save the notification
-      const notification = new Notifications();
-      notification.account = order.name;
-      notification.subject = 'Payment Order initiated!';
-      notification.message = `the user  ${order.name} have initiated payment `;
-      await this.notificationRepo.save(notification);
-
-      return response.data;
-    } catch (error) {
-      console.error(error);
-      let errorMessage = 'Payment processing failed. Please try again later';
-
-      // Handle specific Paystack errors (optional)
-      if (error.response && error.response.data) {
-        errorMessage = error.response.data.message;
-      }
-
-      throw new InternalServerErrorException(errorMessage);
+    switch (config.selectedGateway) {
+      case 'cashfree':
+        return this.cashfreepaymentservice.createPaymentCashfree(orderDetails);
+      case 'razorpay':
+        return this.razorpaypaymentservice.createPaymentRazorpay(orderDetails);
+      case 'payUmoney':
+        return this.payumoneyservice.createPaymentPayUMoney(orderDetails);
+      default:
+        throw new InternalServerErrorException('No payment gateway selected');
     }
+
+
   }
+
 }
