@@ -142,7 +142,7 @@ export class UserAuthService {
   //verify email address 2fa
   async verifyEmail(
     dto: VerifyOtpDto,
-  ): Promise<{ isValid: boolean; accessToken: any }> {
+  ): Promise<{ isValid: boolean; accessToken: any; user:IUser }> {
     try {
       //find the otp provided if it matches with the otp stored
       const findotp = await this.otprepo.findOne({ where: { otp: dto.otp } });
@@ -186,7 +186,7 @@ export class UserAuthService {
         user.role,
       );
 
-      return { isValid: true, accessToken };
+      return { isValid: true, accessToken, user:user };
     } catch (error) {
       if (error instanceof NotFoundException)
         throw new NotFoundException(error.message);
@@ -429,11 +429,13 @@ export class UserAuthService {
       notification.message = `Hello ${finduser.fullname}, just logged in `;
       await this.notificationrepo.save(notification);
 
-      return await this.generatorservice.signToken(
+      const token = await this.generatorservice.signToken(
         finduser.id,
         finduser.email,
         finduser.role,
       );
+
+      return{accesstoken:token, user:finduser}
     } catch (error) {
       if (error instanceof NotFoundException)
         throw new NotFoundException(error.message);

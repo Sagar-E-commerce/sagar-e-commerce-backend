@@ -143,7 +143,7 @@ export class AdminAuthService {
   //verify email address 2fa
   async verifyEmail(
     dto: VerifyOtpDto,
-  ): Promise<{ isValid: boolean; accessToken: any }> {
+  ): Promise<{ isValid: boolean; accessToken: any, admin:IAdmin }> {
     try {
       //find the otp provided if it matches with the otp stored
       const findotp = await this.otprepo.findOne({ where: { otp: dto.otp } });
@@ -187,7 +187,7 @@ export class AdminAuthService {
         admin.role,
       );
 
-      return { isValid: true, accessToken };
+      return { isValid: true, accessToken, admin:admin };
     } catch (error) {
       if (error instanceof NotFoundException)
         throw new NotFoundException(error.message);
@@ -425,11 +425,13 @@ export class AdminAuthService {
       notification.message = `Hello ${findadmin.fullname}, just logged in `;
       await this.notificationrepo.save(notification);
 
-      return await this.generatorservice.signToken(
+      const token = await this.generatorservice.signToken(
         findadmin.id,
         findadmin.email,
         findadmin.role,
       );
+
+      return {accesstoken:token, admin:findadmin}
     } catch (error) {
       if (error instanceof NotFoundException)
         throw new NotFoundException(error.message);
