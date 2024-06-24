@@ -1,6 +1,6 @@
 import { Body, Controller, Post, Req,Get,Patch, Param, UseGuards, Delete, Query } from "@nestjs/common";
 import { CartService } from "./cart.service";
-import { AddToCartDto } from "../dto/otherDto";
+import { AddToCartDto, UpdateCartItemDto } from "../dto/otherDto";
 import { JwtGuard } from "src/auth/guard/jwt.guard";
 import { RoleGuard } from "src/auth/guard/role.guard";
 import { Roles } from "src/auth/decorator/role.decorator";
@@ -17,6 +17,16 @@ export class CartController{
     @Post('add/:productID')
     async addToCart(@Param('productID')productID:number,@Body() dto: AddToCartDto, @Req() req){
       return await this.cartService.AddToCart(req.user.id,productID,dto);
+    }
+
+    @Patch('increase-quantity/:cartitemId')
+    async IncreaseQantity(@Param('cartitemId')cartitemId:string, @Req()req,@Body()dto:UpdateCartItemDto){
+      return await this.cartService.IncreaseCartItemQuantity(req.user,cartitemId,dto)
+    }
+
+    @Patch('decrease-quantity/:cartitemId')
+    async DecreaseQantity(@Param('cartitemId')cartitemId:string, @Req()req,@Body()dto:UpdateCartItemDto){
+      return await this.cartService.DecreaseCartItemQuantity(req.user,cartitemId,dto)
     }
 
     @Delete('remove-item-from-cart/:cartItemId')

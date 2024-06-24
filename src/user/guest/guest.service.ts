@@ -36,6 +36,7 @@ import {
   AddToCartDto,
   FedbackDto,
   NewsLetterDto,
+  UpdateCartItemDto,
   confirmOrderDto,
 } from '../dto/otherDto';
 import { OrderEntity } from 'src/Entity/order.entity';
@@ -221,46 +222,52 @@ export class BrowseService {
 
   async searchProducts(
     keyword: string,
-    category: string,
-    minPrice: number,
-    maxPrice: number,
-  ) {
+    page?: number,
+    perPage?: number,
+    sort?: string,
+    // Add filter options here (e.g., category, price range)
+  ): Promise<{ data: ProductEntity[]; total: number }> {
     try {
-      // Build query criteria
-      const criteria: any = {};
+      const qb = this.productRepo.createQueryBuilder('product');
+  
+      qb.where('product.name ILIKE :keyword', { keyword: `%${keyword}%`});
 
-      if (keyword) {
-        criteria.name = Like(`%${keyword}%`);
+      qb.cache(false)
+  
+      // Add filtering based on additional criteria here
+      // ...
+
+  
+      if (sort) {
+        const [sortField] = sort.split(',');
+        qb.orderBy(`product.${sortField}`, 'DESC');
       }
-
-      if (category) {
-        criteria.category = category;
+  
+      if (page && perPage) {
+        qb.skip((page - 1) * perPage).take(perPage);
       }
-
-      if (minPrice !== undefined && maxPrice !== undefined) {
-        criteria.price = Between(minPrice, maxPrice);
+  
+      const [products, total] = await qb.getManyAndCount();
+  
+      if (!products.length) {
+        throw new NotFoundException(
+          `No products found matching your search criteria for "${keyword}".`,
+        );
       }
-
-      // Search products with related entities
-      const products = await this.productRepo.findAndCount({
-        where: criteria,
-        relations: ['category', 'video', 'likes'], // Include category relation
-      });
-
-      if (products[1] === 0) throw new NotFoundException('products not found');
-
-      return products;
+  
+      return { data: products, total };
     } catch (error) {
-      if (error instanceof NotFoundException)
-        throw new NotFoundException(error.message);
-      else {
-        console.error('Error searching user:', error);
+      if (error instanceof NotFoundException) {
+        throw error;
+      } else {
+        console.error(error);
         throw new InternalServerErrorException(
-          'Failed to search for products ',error.message
+          'An error occurred while searching for products. Please try again later.',
         );
       }
     }
   }
+  
 
   //fetch all product categories
   async FetchAllProductCategories(page: number = 1, limit: number = 30) {
@@ -417,11 +424,11 @@ export class BrowseService {
       // Find the cart item if it already exists in the cart
       const cartItem = cart.items.find((item) => item.product.id === productID);
 
-       // Apply wholesale pricing logic
-       let itemPrice = product.price;
-       if (dto.quantity >= product.minWholesaleQuantity) {
-         itemPrice = product.wholesalePrice;
-       }
+      //apply the wholesale logic
+      let itemPrice = parseFloat(product.price.toString());
+      if (dto.quantity >= (product.minWholesaleQuantity || 0)) {
+        itemPrice = parseFloat(product.wholesalePrice?.toString() || product.price.toString());
+      }
 
       if (cartItem) {
         // If the item is already in the cart, increase the quantity
@@ -458,6 +465,131 @@ export class BrowseService {
       }
     }
   }
+
+
+
+  //increase cartitem quantity 
+  async IncreaseCartItemQuantity(
+    cartid:string,
+    cartitemId: string,
+    dto: UpdateCartItemDto,
+  ): Promise<CartEntity> {
+    try {
+   
+      const cart = await this.cartRepo.findOne({
+        where: { id:cartid, isCheckedOut: false },
+        relations: ['items', 'items.product'],
+      });
+      if (!cart) throw new NotFoundException('Cart not found');
+
+       // Check if the cart is already checked out
+       if (cart.isCheckedOut)
+        throw new BadRequestException('Cart has already been checked out');
+      console.log('Cart is not checked out');
+
+   
+    // Find the cart item to increase the quantity of
+    const cartItem = cart.items.find((item) => item.id === cartitemId);
+    if (!cartItem) throw new NotFoundException('cart item not found');
+
+    // Check if the product has enough stock
+    const product = cartItem.product;
+    if (!product) throw new NotFoundException('product not found');
+
+    if (product.stock < dto.quantity) {
+      throw new NotAcceptableException(
+        'Not enough stock for the requested quantity',
+      );
+    }
+
+    // Increase the quantity and update the total price
+    cartItem.quantity += dto.quantity;
+    //cartItem.price = (parseFloat(product.price.toString()) * cartItem.quantity);
+
+    // Decrease the product stock
+    product.stock -= dto.quantity;
+    await this.productRepo.save(product);
+
+    await this.cartRepo.save(cart);
+    return cart;
+    } catch (error) {
+      if (error instanceof NotFoundException || error instanceof NotAcceptableException) {
+        throw error;
+      } else {
+        console.error(error);
+        throw new InternalServerErrorException(
+          'Something went wrong while trying to update the cart item quantity, please try again later',
+          error.message,
+        );
+      }
+    }
+  }
+
+
+
+  //decrease carted item wuantity
+  async DecreaseCartItemQuantity(
+   
+    cartid:string,
+    cartitemId: string,
+    dto: UpdateCartItemDto,
+  ): Promise<CartEntity> {
+    try {
+    
+      // Find the user's cart
+      const cart = await this.cartRepo.findOne({
+        where: { id:cartid, isCheckedOut: false },
+        relations: ['items', 'items.product'],
+      });
+      if (!cart) throw new NotFoundException('Cart not found');
+
+       // Check if the cart is already checked out
+       if (cart.isCheckedOut)
+        throw new BadRequestException('Cart has already been checked out');
+      console.log('Cart is not checked out');
+
+   
+    // Find the cart item to increase the quantity of
+    const cartItem = cart.items.find((item) => item.id === cartitemId);
+    if (!cartItem) throw new NotFoundException('cart item not found');
+
+    // Check if the product has enough stock
+    const product = cartItem.product;
+    if (!product) throw new NotFoundException('product not found');
+
+    if (product.stock < dto.quantity) {
+      throw new NotAcceptableException(
+        'Not enough stock for the requested quantity',
+      );
+    }
+
+    // decrease the quantity and update the total price
+    cartItem.quantity -= dto.quantity;
+    //cartItem.price = (parseFloat(product.price.toString()) * cartItem.quantity);
+
+    // increase the product stock
+    product.stock += dto.quantity;
+    await this.productRepo.save(product);
+
+    await this.cartRepo.save(cart);
+    return cart;
+    } catch (error) {
+      if (error instanceof NotFoundException || error instanceof NotAcceptableException) {
+        throw error;
+      } else {
+        console.error(error);
+        throw new InternalServerErrorException(
+          'Something went wrong while trying to update the cart item quantity, please try again later',
+          error.message,
+        );
+      }
+    }
+  }
+
+
+
+
+
 
   // Remove product from cart
   async GuestRemoveItemFromCart(

@@ -5,13 +5,14 @@ import {
   Get,
   Param,
   ParseIntPipe,
+  Patch,
   Post,
   Query,
   Req,
   UseGuards,
 } from '@nestjs/common';
 import { BrowseService } from './guest.service';
-import { AddToCartDto, FedbackDto, NewsLetterDto, confirmOrderDto } from '../dto/otherDto';
+import { AddToCartDto, FedbackDto, NewsLetterDto, UpdateCartItemDto, confirmOrderDto } from '../dto/otherDto';
 import { JwtGuard } from 'src/auth/guard/jwt.guard';
 import { RoleGuard } from 'src/auth/guard/role.guard';
 import { Roles } from 'src/auth/decorator/role.decorator';
@@ -24,16 +25,15 @@ export class BrowseController {
   @Get('search-product')
   async searchProducts(
     @Query('keyword') keyword: string,
-    @Query('category') category: string,
-    @Query('minPrice') minPrice: number,
-    @Query('maxPrice') maxPrice: number,
+    @Query('page') page?: number,
+    @Query('perPage') perPage?: number,
+    @Query('sort') sort?: string,
+    
+    
+    
   ) {
     return this.browseservice.searchProducts(
-      keyword,
-      category,
-      minPrice,
-      maxPrice,
-    );
+      keyword,page,perPage,sort)
   }
 
   @Get('fetch-all-videos')
@@ -158,6 +158,18 @@ export class BrowseController {
   async AddProductToCart(@Body()dto:AddToCartDto,@Param('productID')productID:number){
     return await this.browseservice.GuestAddToCart(productID,dto)
   }
+
+  @Patch('guest-decrease-quantity/:cartid/:cartitemId')
+  async DecreaseQantity(@Param('cartitemId')cartitemId:string, @Param('cartid')cartid:string,@Body()dto:UpdateCartItemDto){
+    return await this.browseservice.DecreaseCartItemQuantity(cartid,cartitemId,dto)
+  }
+
+  
+  @Patch('guest-increase-quantity/:cartid/:cartitemId')
+  async IncreaseQantity(@Param('cartitemId')cartitemId:string, @Param('cartid')cartid:string,@Body()dto:UpdateCartItemDto){
+    return await this.browseservice.IncreaseCartItemQuantity(cartid,cartitemId,dto)
+  }
+
 
   @Get('fetch-guest-cart/:cartId')
   async getCart(@Param('cartId')cartId:string) {
