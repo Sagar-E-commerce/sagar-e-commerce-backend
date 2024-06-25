@@ -9,7 +9,7 @@ export class CartEntity implements ICart{
   @PrimaryGeneratedColumn()
   id: string;
 
-  @ManyToOne(() => UserEntity, (user) => user.carts)
+  @ManyToOne(() => UserEntity, (user) => user.carts,{nullable:false})
   user: UserEntity;
 
   @OneToMany(() => CartItemEntity, (cartItem) => cartItem.cart, { cascade: true })

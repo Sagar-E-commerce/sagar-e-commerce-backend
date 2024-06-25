@@ -16,7 +16,7 @@ export class CartController{
 
     @Post('add/:productID')
     async addToCart(@Param('productID')productID:number,@Body() dto: AddToCartDto, @Req() req){
-      return await this.cartService.AddToCart(req.user.id,productID,dto);
+      return await this.cartService.AddToCart(req.user,productID,dto);
     }
 
     @Patch('increase-quantity/:cartitemId')
@@ -31,16 +31,16 @@ export class CartController{
 
     @Delete('remove-item-from-cart/:cartItemId')
     async removeItemFromCart(@Req()req, @Param('cartItemId')cartItemId:string){
-      return await this.cartService.RemoveFromCart(req.user.id, cartItemId)    }
+      return await this.cartService.RemoveFromCart(req.user, cartItemId)    }
   
     @Get('fetch-cart')
     async getCart(@Req() req) {
-      return await this.cartService.getCart(req.user.id);
+      return await this.cartService.getCart(req.user);
     }
   
     @Post('checkout/')
     async checkoutCart(@Req() req) {
-      return await this.cartService.checkoutCart(req.user.id);
+      return await this.cartService.checkoutCart(req.user);
     }
 
   

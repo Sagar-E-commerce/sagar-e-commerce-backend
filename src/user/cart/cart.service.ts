@@ -50,7 +50,7 @@ export class CartService {
       });
 
       if (cart) {
-        console.log(`existing cart found:`,cart.id)
+        console.log(`existing cart found:`,cart)
       }
       else {
         
@@ -58,6 +58,8 @@ export class CartService {
         cart.items = [],
         cart.user = user;
         await this.cartRepo.save(cart)
+
+        console.log('new cart', cart)
       }
 
       //check if product selected exists
@@ -301,25 +303,32 @@ export class CartService {
   }
 
   //get cart
-  async getCart(user: UserEntity): Promise<ICart> {
+  async getCart(user: UserEntity): Promise<ICart & { itemCount: number }> {
     try {
       const cart = await this.cartRepo.findOne({
-        where: { user: {id:user.id}, isCheckedOut: false },
-        relations: ['user', 'items','items.product'],
+        where: { user: { id: user.id }, isCheckedOut: false },
+        relations: ['user', 'items', 'items.product'],
       });
-      if (!cart) throw new NotFoundException('cart not found');
-      return cart;
+      if (!cart) throw new NotFoundException('Cart not found');
+  
+     
+         // Calculate the number of unique items in the cart
+    const itemCount = cart.items.length;
+  
+      // Return the cart along with the item count
+      return { ...cart, itemCount };
     } catch (error) {
-      if (error instanceof NotFoundException)
-        throw new NotFoundException(error.message);
+      if (error instanceof NotFoundException) throw new NotFoundException(error.message);
       else {
         console.log(error);
         throw new InternalServerErrorException(
-          'something went wrong while trying to fetch cart, please try again later',error.message
+          'Something went wrong while trying to fetch cart, please try again later',
+          error.message,
         );
       }
     }
   }
+  
 
   async checkoutCart(user: UserEntity) {
     try {
