@@ -4,6 +4,7 @@ import { VideoEntity } from "./videos.entity"
 import { CategoryEntity } from "./productCategory.entity"
 import { FavouriteEntity } from "./likes.entity"
 import { UserEntity } from "./users.entity"
+import { ProductAffiliateLinkEntity } from "./product-affliateLinks"
 
 export interface IProduct{
     id:number
@@ -28,6 +29,9 @@ export interface IProduct{
     available_sizes:string
     available_colors:string
     favourites: FavouriteEntity[]
+    affiliateLink:string
+    affiliateLinks: ProductAffiliateLinkEntity[];
+    
     
 }
 
@@ -98,6 +102,12 @@ export class ProductEntity implements IProduct{
     @Column({nullable:true,type:'timestamp'})
     updatedAT: Date
 
+    @Column({ nullable: true })
+    affiliateLink: string;
+  
+    @OneToMany(() => ProductAffiliateLinkEntity, (link) => link.product)
+    affiliateLinks: ProductAffiliateLinkEntity[];
+
     @OneToMany(()=>VideoEntity,vid=> vid.product)
     video: VideoEntity[]
 
@@ -106,6 +116,8 @@ export class ProductEntity implements IProduct{
 
     @OneToMany(()=>FavouriteEntity,like=>like.product)
     favourites: FavouriteEntity[]
+
+
 
 
 

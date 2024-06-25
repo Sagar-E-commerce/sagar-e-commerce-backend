@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { AdminEntity } from 'src/Entity/admin.entity';
+import { AffiliateEntity } from 'src/Entity/affliates.entity';
 import { CartEntity, CartItemEntity } from 'src/Entity/cart.entity';
 import {
   DiscountCouponEntity,
@@ -15,6 +16,7 @@ import { Notifications } from 'src/Entity/notifications.entity';
 import { OrderEntity, OrderItemEntity } from 'src/Entity/order.entity';
 import { UserOtp } from 'src/Entity/otp.entity';
 import { PaymentConfigurationEntity } from 'src/Entity/paymentConfig.entity';
+import { ProductAffiliateLinkEntity } from 'src/Entity/product-affliateLinks';
 import { CategoryEntity } from 'src/Entity/productCategory.entity';
 import { ProductEntity } from 'src/Entity/products.entity';
 import { UserEntity } from 'src/Entity/users.entity';
@@ -53,7 +55,9 @@ export class TypeOrmService {
         FeddbackEntity,
         ShippingFlatRateEntity,
         FavouriteEntity,
-        PaymentConfigurationEntity
+        PaymentConfigurationEntity,
+        AffiliateEntity,
+        ProductAffiliateLinkEntity
       ],
       migrations: [],
       subscribers: [],
