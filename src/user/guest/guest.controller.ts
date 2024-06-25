@@ -154,9 +154,9 @@ export class BrowseController {
 
 
 
-  @Post('guest-add-product-to-cart/:productID')
-  async AddProductToCart(@Body()dto:AddToCartDto,@Param('productID')productID:number){
-    return await this.browseservice.GuestAddToCart(productID,dto)
+  @Post('guest-add-product-to-cart/:guestCartId/:productID')
+  async AddProductToCart(@Body()dto:AddToCartDto,@Param('productID')productID:number, @Param('guestCartId') guestCartId: string,){
+    return await this.browseservice.GuestAddToCart(guestCartId,productID,dto)
   }
 
   @Patch('guest-decrease-quantity/:cartid/:cartitemId')

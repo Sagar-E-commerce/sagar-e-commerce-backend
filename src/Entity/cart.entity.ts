@@ -17,6 +17,9 @@ export class CartEntity implements ICart{
 
   @Column({ default: false })
   isCheckedOut: boolean;
+
+  @Column({ nullable: true })
+  guestCartId: string;
 }
 
 @Entity('cart_items')

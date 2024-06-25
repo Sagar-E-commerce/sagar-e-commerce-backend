@@ -396,15 +396,15 @@ export class BrowseService {
   }
 
   //add product to cart
-  async GuestAddToCart(productID: number, dto: AddToCartDto): Promise<ICart> {
+  async GuestAddToCart(guestCartId: string,productID: number, dto: AddToCartDto): Promise<ICart> {
     try {
       //check if the user has checked out before creating a new cart
       let cart = await this.cartRepo.findOne({
-        where: { isCheckedOut: false },
+        where: { guestCartId:guestCartId, isCheckedOut: false },
         relations: ['items', 'items.product'],
       });
       if (!cart) {
-        cart = this.cartRepo.create({ items: [] });
+        cart = this.cartRepo.create({ guestCartId:guestCartId, items: [] });
       }
 
       //check if product selected exists

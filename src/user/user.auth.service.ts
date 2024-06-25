@@ -48,7 +48,7 @@ export class UserAuthService {
     try {
       const user = await this.userRepo.findOne({
         where: { id: User.id },
-        relations: ['carts','carts.items', 'favourites','favourites.product'],
+        relations: ['carts','carts.items', 'favourites','favourites.product','orders'],
       });
       if (!user) {
         throw new NotFoundException('user not found');

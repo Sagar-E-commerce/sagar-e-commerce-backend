@@ -46,11 +46,18 @@ export class CartService {
       //check if the user has checked out before creating a new cart
       let cart = await this.cartRepo.findOne({
         where: { user:{id:user.id}, isCheckedOut: false },
-        relations: ['items', 'items.product'],
+        relations: ['user','items', 'items.product'],
       });
-      if (!cart) {
-        cart = this.cartRepo.create({ user:user, items: [] });
-        console.log('cart',cart)
+
+      if (cart) {
+        console.log(`existing cart found:`,cart.id)
+      }
+      else {
+        
+        cart = new CartEntity()
+        cart.items = [],
+        cart.user = user;
+        await this.cartRepo.save(cart)
       }
 
       //check if product selected exists

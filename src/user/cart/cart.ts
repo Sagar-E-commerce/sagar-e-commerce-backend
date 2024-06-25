@@ -7,6 +7,7 @@ export interface ICart{
     user:UserEntity
     items:CartItemEntity[]
     isCheckedOut:boolean
+    guestCartId: string;
 
 }
 
