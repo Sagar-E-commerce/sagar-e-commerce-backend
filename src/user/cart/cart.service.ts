@@ -36,21 +36,16 @@ export class CartService {
 
   //add product to cart
   async AddToCart(
-    User: UserEntity,
+    user: UserEntity,
     productID: number,
     dto: AddToCartDto,
   ): Promise<ICart> {
     try {
-      //check the user
-      const user = await this.userRepo.findOne({
-        where: { id: User.id },
-        relations: ['carts'],
-      });
-      if (!user) throw new NotFoundException('user not found');
+     
 
       //check if the user has checked out before creating a new cart
       let cart = await this.cartRepo.findOne({
-        where: { user:user, isCheckedOut: false },
+        where: { user:{id:user.id}, isCheckedOut: false },
         relations: ['items', 'items.product'],
       });
       if (!cart) {
@@ -125,20 +120,15 @@ export class CartService {
 
   //increase cartitem quantity 
   async IncreaseCartItemQuantity(
-    User: UserEntity,
+    user: UserEntity,
     cartitemId: string,
     dto: UpdateCartItemDto,
   ): Promise<CartEntity> {
     try {
-     //check the user
-     const user = await this.userRepo.findOne({
-      where: { id: User.id },
-      relations: ['carts'],
-    });
-    if (!user) throw new NotFoundException('user not found');
+     
       // Find the user's cart
       const cart = await this.cartRepo.findOne({
-        where: { user, isCheckedOut: false },
+        where: { user:{id:user.id}, isCheckedOut: false },
         relations: ['items', 'items.product'],
       });
       if (!cart) throw new NotFoundException('Cart not found');
@@ -190,20 +180,15 @@ export class CartService {
 
   //decrease carted item wuantity
   async DecreaseCartItemQuantity(
-    User: UserEntity,
+    user: UserEntity,
     cartitemId: string,
     dto: UpdateCartItemDto,
   ): Promise<CartEntity> {
     try {
-     //check the user
-     const user = await this.userRepo.findOne({
-      where: { id: User.id },
-      relations: ['carts'],
-    });
-    if (!user) throw new NotFoundException('user not found');
+    
       // Find the user's cart
       const cart = await this.cartRepo.findOne({
-        where: { user, isCheckedOut: false },
+        where: { user:{id:user.id}, isCheckedOut: false },
         relations: ['items', 'items.product'],
       });
       if (!cart) throw new NotFoundException('Cart not found');
@@ -257,18 +242,13 @@ export class CartService {
 
 
   // Remove product from cart
-  async RemoveFromCart(User: UserEntity, cartItemId: string): Promise<ICart> {
+  async RemoveFromCart(user: UserEntity, cartItemId: string): Promise<ICart> {
     try {
-      // Check the user
-      const user = await this.userRepo.findOne({
-        where: { id: User.id },
-        relations: ['carts'],
-      });
-      if (!user) throw new NotFoundException('user not found');
+      
 
       // Check if the user has a cart
       const cart = await this.cartRepo.findOne({
-        where: { user: User },
+        where: { user: {id:user.id} },
         relations: ['items', 'items.product'],
       });
       if (!cart) throw new NotFoundException('cart not found');
@@ -314,10 +294,10 @@ export class CartService {
   }
 
   //get cart
-  async getCart(User: UserEntity): Promise<ICart> {
+  async getCart(user: UserEntity): Promise<ICart> {
     try {
       const cart = await this.cartRepo.findOne({
-        where: { user: User, isCheckedOut: false },
+        where: { user: {id:user.id}, isCheckedOut: false },
         relations: ['user', 'items','items.product'],
       });
       if (!cart) throw new NotFoundException('cart not found');
@@ -334,15 +314,15 @@ export class CartService {
     }
   }
 
-  async checkoutCart(User: UserEntity) {
+  async checkoutCart(user: UserEntity) {
     try {
       const cart = await this.cartRepo.findOne({
-        where: { user: User },
+        where: { user:{id:user.id} },
         relations: ['items', 'user', 'items.product'],
       });
 
       if (!cart) {
-        console.log('Cart not found for user:', User.id);
+        console.log('Cart not found for user:', user.id);
         throw new NotFoundException('Cart not found');
       }
 
@@ -353,7 +333,7 @@ export class CartService {
       console.log('Cart checked out and saved:', cart);
 
       // Call the order creation service
-      const order = await this.orderservice.CreateOrderFromCart(User);
+      const order = await this.orderservice.CreateOrderFromCart(user);
       console.log('Order created from cart:', order);
 
       return {
