@@ -1,4 +1,9 @@
-import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+import {
+  MiddlewareConsumer,
+  Module,
+  NestModule,
+  RequestMethod,
+} from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
@@ -9,7 +14,6 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { TypeOrmService } from './typeorm/typeorm.service';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { ConfigModule } from '@nestjs/config';
-import { GuestCartMiddleware } from './common/middleware/guestcartId.middleware';
 
 @Module({
   imports: [
@@ -35,8 +39,6 @@ import { GuestCartMiddleware } from './common/middleware/guestcartId.middleware'
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule implements NestModule{
-  configure(consumer: MiddlewareConsumer) {
-    consumer.apply(GuestCartMiddleware).forRoutes('/browse','/cart')
-  }
+export class AppModule {
+ 
 }

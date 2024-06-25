@@ -51,6 +51,8 @@ import { NewsLetterEntity } from 'src/Entity/newsletter.entity';
 import { IOrder } from '../order/order';
 import { Notifications } from 'src/Entity/notifications.entity';
 import { ShiprocketService } from 'src/common/services/shiprocket.service';
+import { v4 as uuidv4 } from 'uuid';
+import { Request, Response } from 'express';
 @Injectable()
 export class BrowseService {
   constructor(
@@ -79,6 +81,8 @@ export class BrowseService {
     private readonly notficationrepo: NotificationRepository,
     private orderservice: OrderService,
     private shiprocketservice:ShiprocketService
+   
+    
 
     
   ) {}
@@ -396,15 +400,28 @@ export class BrowseService {
   }
 
   //add product to cart
-  async GuestAddToCart(guestCartId: string,productID: number, dto: AddToCartDto): Promise<ICart> {
+  async GuestAddToCart(productID: number, dto: AddToCartDto): Promise<ICart> {
     try {
+         // Retrieve the cart ID from cookies, or create a new one if not present
+    // let cartId = req.cookies['guestCartId'];
+    // if (!cartId) {
+    //   cartId = uuidv4();
+    //   res.cookie('guestCartId', cartId, { httpOnly: true, secure: true, maxAge: 30 * 24 * 60 * 60 * 1000 }); // 30 days
+    // }
+
+    const cartid = uuidv4()
       //check if the user has checked out before creating a new cart
       let cart = await this.cartRepo.findOne({
-        where: { guestCartId:guestCartId, isCheckedOut: false },
+        where: { isCheckedOut: false },
         relations: ['items', 'items.product'],
       });
+
+
+    console.log('Existing cart:', cart, cartid);
+
+
       if (!cart) {
-        cart = this.cartRepo.create({ guestCartId:guestCartId, items: [] });
+        cart = this.cartRepo.create({ guestCartId:cartid, items: [] });
       }
 
       //check if product selected exists

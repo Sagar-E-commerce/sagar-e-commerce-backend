@@ -9,6 +9,7 @@ import {
   Post,
   Query,
   Req,
+  Res,
   UseGuards,
 } from '@nestjs/common';
 import { BrowseService } from './guest.service';
@@ -17,6 +18,9 @@ import { JwtGuard } from 'src/auth/guard/jwt.guard';
 import { RoleGuard } from 'src/auth/guard/role.guard';
 import { Roles } from 'src/auth/decorator/role.decorator';
 import { Role } from 'src/Enums/all-enums';
+import { v4 as uuidv4 } from 'uuid';
+import { Request, Response } from 'express';
+
 
 @Controller('browse')
 export class BrowseController {
@@ -154,9 +158,10 @@ export class BrowseController {
 
 
 
-  @Post('guest-add-product-to-cart/:guestCartId/:productID')
-  async AddProductToCart(@Body()dto:AddToCartDto,@Param('productID')productID:number, @Param('guestCartId') guestCartId: string,){
-    return await this.browseservice.GuestAddToCart(guestCartId,productID,dto)
+  @Post('guest-add-product-to-cart/:productID')
+  async AddProductToCart(@Body()dto:AddToCartDto,@Param('productID')productID:number){
+    
+      return await this.browseservice.GuestAddToCart(productID, dto);
   }
 
   @Patch('guest-decrease-quantity/:cartid/:cartitemId')
