@@ -17,11 +17,9 @@ export interface IOrder{
     IsCouponCodeApplied:boolean
     shippinFee:number
     total:number
-    
     isPaid:boolean
     createdAT:Date
     orderType:OrderType
-    paymentMethod:paymentType
     trackingID:string
     status:OrderStatus
     updatedAT:Date

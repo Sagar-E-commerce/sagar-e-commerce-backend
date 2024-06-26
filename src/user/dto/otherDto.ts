@@ -66,9 +66,6 @@ export class AddToCartDto {
     @IsString()
     promoCode:string
 
-    @IsNotEmpty()
-    @IsEnum(paymentType)
-    paymentMethod:paymentType
 
     @IsString()
     @IsNotEmpty()
@@ -91,7 +88,9 @@ export class AddToCartDto {
     @IsOptional()
     dropOffpincode:string
 
-    
+    @IsString()
+    @IsOptional()
+    pickUppincode:string
 
 
   }

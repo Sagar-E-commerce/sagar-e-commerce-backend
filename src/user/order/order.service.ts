@@ -331,25 +331,29 @@ export class OrderService {
       const receiptid = await this.generatorservice.generatereceiptID();
 
       if (payment) {
+
+          // Prepare the items array for the receipt
+          const items = order.items.map((item) => ({
+            description: item.product.name,
+            quantity: item.quantity,
+            price: item.price,
+          }));
+          await this.mailer.sendOrderConfirmationWithReceipt(
+            order.user.email,
+            order.user.fullname,
+            order.trackingID,
+            receiptid,
+            items,
+            order.total,
+          );
+
+          //reccomend dispatch route 
         await this.shiprocketservice.recommendDispatchService(order);
 
-        // Prepare the items array for the receipt
-        const items = order.items.map((item) => ({
-          description: item.product.name,
-          quantity: item.quantity,
-          price: item.price,
-        }));
-        await this.mailer.sendOrderConfirmationWithReceipt(
-          order.user.email,
-          order.user.fullname,
-          order.trackingID,
-          receiptid,
-          items,
-          order.total,
-        );
+      
       }
 
-      order.paymentMethod = payment;
+     
       order.name = dto.name;
       order.mobile = dto.mobile;
       order.billing_address = dto.billing_address;

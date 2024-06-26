@@ -54,8 +54,6 @@ export class OrderEntity implements IOrder {
   @Column({type:'enum', enum:OrderType, nullable:true})
   orderType:OrderType
 
-  @Column({type:'enum', enum:paymentType, nullable:true})
-  paymentMethod:paymentType
 
   @Column({nullable:true, type:"timestamp"})
   createdAT: Date;
