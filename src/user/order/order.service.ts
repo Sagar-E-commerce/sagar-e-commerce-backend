@@ -64,7 +64,7 @@ export class OrderService {
     private generatorservice: GeneatorService,
     private paymentservice: PaymentGatewaysService,
     private mailer: Mailer,
-    private shiprocketservice:ShiprocketService
+    private shiprocketservice: ShiprocketService,
   ) {}
 
   async GuestCreateOrderFromCart(cartID: string): Promise<IOrder> {
@@ -81,20 +81,21 @@ export class OrderService {
       if (cart.items.length === 0) {
         throw new BadRequestException('Cart is empty');
       }
-        
+
       console.log('Calculating subtotal and total weight for cart items');
       // Calculate the total of all items in the cart, including tax if applicable, and total weight
       const { subtotal, totalWeight } = cart.items.reduce(
         (acc, item) => {
           const productPrice = item.price * item.quantity;
-          const taxAmount = item.product.hasTax ? productPrice * (item.product.taxRate / 100) : 0;
+          const taxAmount = item.product.hasTax
+            ? productPrice * (item.product.taxRate / 100)
+            : 0;
           acc.subtotal += productPrice + taxAmount;
           acc.totalWeight += item.product.weight * item.quantity;
           return acc;
         },
-        { subtotal: 0, totalWeight: 0 }
+        { subtotal: 0, totalWeight: 0 },
       );
-
 
       // Get the latest flat rate
       const [flatrate] = await this.flatrateripo.find({
@@ -109,7 +110,7 @@ export class OrderService {
       const order = this.orderRepo.create({
         orderID: `#BnsO-${await this.generatorservice.generateOrderID()}`,
         subTotal: subtotal,
-        weight:totalWeight,
+        weight: totalWeight,
         shippinFee: shippingFee,
         total: subtotal + shippingFee,
         isPaid: false,
@@ -183,12 +184,14 @@ export class OrderService {
       const { subtotal, totalWeight } = cart.items.reduce(
         (acc, item) => {
           const productPrice = item.price * item.quantity;
-          const taxAmount = item.product.hasTax ? productPrice * (item.product.taxRate / 100) : 0;
+          const taxAmount = item.product.hasTax
+            ? productPrice * (item.product.taxRate / 100)
+            : 0;
           acc.subtotal += productPrice + taxAmount;
           acc.totalWeight += item.product.weight * item.quantity;
           return acc;
         },
-        { subtotal: 0, totalWeight: 0 }
+        { subtotal: 0, totalWeight: 0 },
       );
       // Get the latest flat rate      // Calculate the total of all items in the cart, including tax if applicable
 
@@ -208,7 +211,7 @@ export class OrderService {
         subTotal: subtotal,
         shippinFee: shippingFee,
         total: subtotal + shippingFee,
-        weight : totalWeight,
+        weight: totalWeight,
         isPaid: false,
         createdAT: new Date(),
         trackingID: `BnS-${await this.generatorservice.generateTrackingID()}`,
@@ -288,65 +291,71 @@ export class OrderService {
       });
       if (!order) throw new NotFoundException('order not found');
 
-      
       if (dto.promoCode) {
         // Check the coupon code
         const coupon = await this.discountripo.findOne({
           where: { OneTime_discountCode: dto.promoCode },
         });
-  
+
         if (!coupon) {
           throw new NotFoundException(
             'wrong coupon code provided, please provide a valid coupon',
           );
         }
-  
+
         // Check if coupon code is expired
         if (coupon.expires_in <= new Date() || coupon.isExpired === true) {
           throw new NotAcceptableException(
             'sorry the coupon code provided is already expired',
           );
         }
-  
+
         // Apply the discount if promo code is valid
         order.discount = coupon.percentageOff;
         order.IsCouponCodeApplied = true;
-        const totalWithDiscount = (Number(order.subTotal) * Number(order.discount)) / 100;
+        const totalWithDiscount =
+          (Number(order.subTotal) * Number(order.discount)) / 100;
         order.total = Number(order.subTotal) - Number(totalWithDiscount);
       } else {
         // If no promo code is provided, use the original total
         order.total = Number(order.subTotal) + Number(order.shippinFee);
       }
-  
+
       // Continue the order
       order.orderType = dto.orderType;
-  
+
       // Handle payment methods
-        // Handle payment methods
-        const payment = await this.paymentservice.PaymentService(order);
+      // Handle payment methods
+      const payment = await this.paymentservice.PaymentService(order);
 
-        if (payment){
-          await this.shiprocketservice.recommendDispatchService(order)
-        }
-     
+      const receiptid = await this.generatorservice.generatereceiptID();
 
+      if (payment) {
+        await this.shiprocketservice.recommendDispatchService(order);
+
+        // Prepare the items array for the receipt
+        const items = order.items.map((item) => ({
+          description: item.product.name,
+          quantity: item.quantity,
+          price: item.price,
+        }));
+        await this.mailer.sendOrderConfirmationWithReceipt(
+          order.user.email,
+          order.user.fullname,
+          order.trackingID,
+          receiptid,
+          items,
+          order.total,
+        );
+      }
 
       order.paymentMethod = payment;
       order.name = dto.name;
       order.mobile = dto.mobile;
       order.billing_address = dto.billing_address;
       order.email = dto.email;
-    
 
       await this.orderRepo.save(order);
-
-      //send mail to user
-      await this.mailer.OrderAcceptedMail(
-        order.email,
-        order.name,
-        order.trackingID,
-        order.orderID,
-      );
 
       return 'the order has been successfully made, thanks for your patronage';
     } catch (error) {
@@ -364,4 +373,3 @@ export class OrderService {
     }
   }
 }
-

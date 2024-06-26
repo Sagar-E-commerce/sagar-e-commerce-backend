@@ -178,7 +178,7 @@ export class UserAuthService {
       await this.userRepo.save(user);
 
       //send welcome mail
-      await this.mailerservice.WelcomeMailAdmin(user.email, user.fullname);
+      await this.mailerservice.WelcomeMail(user.email, user.fullname);
 
       const accessToken = await this.generatorservice.signToken(
         user.id,
