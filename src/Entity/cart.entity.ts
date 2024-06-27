@@ -30,7 +30,7 @@ export class CartItemEntity implements ICartItem{
   @ManyToOne(() => CartEntity, (cart) => cart.items)
   cart: CartEntity;
 
-  @ManyToOne(() => ProductEntity)
+  @ManyToOne(() => ProductEntity,{cascade:true, onDelete:'CASCADE', onUpdate:'CASCADE'})
   product: ProductEntity;
 
   @Column('int')
