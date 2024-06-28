@@ -135,10 +135,10 @@ export class AddToCartDto {
 
 export class ProcessPaymentDto {
   @IsString()
+  @IsNotEmpty()
   gateway: string; // E.g., 'cashfree', 'razorpay', 'payumoney'
 
-  @IsNumber()
-  amount: number;
+  
 
   // Other necessary fields...
 }

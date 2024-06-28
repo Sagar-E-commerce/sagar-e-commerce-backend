@@ -284,7 +284,7 @@ export class OrderService {
     User: UserEntity,
     dto: confirmOrderDto,
     orderID: string,
-  ): Promise<string> {
+  ){
     try {
       const order = await this.orderRepo.findOne({
         where: { id: orderID, user: User, isPaid: false },
@@ -305,7 +305,7 @@ export class OrderService {
         }
 
         // Check if coupon code is expired
-        if (coupon.expires_in <= new Date() || coupon.isExpired === true) {
+        if (coupon.expires_in <= new Date()) {
           throw new NotAcceptableException(
             'sorry the coupon code provided is already expired',
           );
@@ -331,7 +331,7 @@ export class OrderService {
 
       await this.orderRepo.save(order);
 
-      return 'the order has been successfully placed, Please Proceed to make Payment';
+      return {message:'the order has been successfully placed, Please Proceed to make Payment',order};
     } catch (error) {
       if (error instanceof NotFoundException)
         throw new NotFoundException(error.message);

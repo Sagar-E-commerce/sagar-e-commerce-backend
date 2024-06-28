@@ -40,7 +40,7 @@ export class PaymentGatewaysService {
   async processPayment(orderID: string, dto: ProcessPaymentDto): Promise<any> {
     const order = await this.orderRepo.findOne({
       where: { id: orderID, isPaid: false },
-      relations: ['user', 'items'],
+      relations: ['user', 'items','items.product'],
     });
     if (!order) throw new NotFoundException('Order not found');
 
