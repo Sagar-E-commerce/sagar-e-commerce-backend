@@ -15,6 +15,7 @@ import { RazorPayPaymentGatewayService } from 'src/admin/dashboard/payment-confi
 import { PayUmoneyPaymentGatewayService } from 'src/admin/dashboard/payment-config/payumoney.service';
 import { PaymentConfigurationEntity } from 'src/Entity/paymentConfig.entity';
 import { Repository } from 'typeorm';
+import { ProcessPaymentDto } from '../dto/otherDto';
 
 @Injectable()
 export class PaymentGatewaysService {
@@ -36,21 +37,23 @@ export class PaymentGatewaysService {
     return config;
   }
 
-  async PaymentService(orderDetails: OrderEntity): Promise<any> {
-    const config = await this.getConfig();
+  async processPayment(orderID: string, dto: ProcessPaymentDto): Promise<any> {
+    const order = await this.orderRepo.findOne({
+      where: { id: orderID, isPaid: false },
+      relations: ['user', 'items'],
+    });
+    if (!order) throw new NotFoundException('Order not found');
 
-    switch (config.selectedGateway) {
+    switch (dto.gateway) {
       case 'cashfree':
-        return this.cashfreepaymentservice.createPaymentCashfree(orderDetails);
+        return this.cashfreepaymentservice.createPaymentCashfree(order);
+      case 'payumoney':
+        return this.payumoneyservice.createPaymentPayUMoney(order);
       case 'razorpay':
-        return this.razorpaypaymentservice.createPaymentRazorpay(orderDetails);
-      case 'payUmoney':
-        return this.payumoneyservice.createPaymentPayUMoney(orderDetails);
+        return this.razorpaypaymentservice.createPaymentRazorpay(order);
       default:
         throw new InternalServerErrorException('No payment gateway selected');
     }
-
-
   }
 
 }

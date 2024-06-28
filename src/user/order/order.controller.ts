@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Param, Post, Query, Req, UseGuards } from "@nestjs/common";
 import { OrderService } from "./order.service";
-import { FedbackDto, NewsLetterDto, confirmOrderDto } from "../dto/otherDto";
+import { FedbackDto, NewsLetterDto, ProcessPaymentDto, confirmOrderDto } from "../dto/otherDto";
 import { JwtGuard } from "src/auth/guard/jwt.guard";
 import { RoleGuard } from "src/auth/guard/role.guard";
 import { Roles } from "src/auth/decorator/role.decorator";
@@ -18,6 +18,12 @@ export class OrderController{
     @Post('confirm-order/:orderID')
     async confirmOrder(@Body()dto:confirmOrderDto, @Req()req, @Param('orderID')orderID:string){
         return await this.orderservice.confirmOrder(req.user,dto,orderID)
+    }
+
+
+    @Post('process-payment/:orderID')
+    async ProcessPayment(@Body()dto:ProcessPaymentDto, @Param('orderID')orderID:string){
+        return await this.orderservice.processPayment(orderID,dto)
     }
 
 

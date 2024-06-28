@@ -31,7 +31,7 @@ import { IOrder } from './order';
 import { GeneatorService } from 'src/common/services/generator.service';
 import { Mailer } from 'src/common/mailer/mailer.service';
 import { OrderStatus, paymentType } from 'src/Enums/all-enums';
-import { FedbackDto, NewsLetterDto, confirmOrderDto } from '../dto/otherDto';
+import { FedbackDto, NewsLetterDto, ProcessPaymentDto, confirmOrderDto } from '../dto/otherDto';
 import {
   DiscountCouponEntity,
   DiscountUsageEntity,
@@ -42,6 +42,7 @@ import { NewsLetterEntity } from 'src/Entity/newsletter.entity';
 import { FeddbackEntity } from 'src/Entity/feedback.entity';
 import { ShippingFlatRateRepository } from 'src/admin/admin.repository';
 import { ShiprocketService } from 'src/common/services/shiprocket.service';
+import { error } from 'console';
 
 @Injectable()
 export class OrderService {
@@ -323,37 +324,6 @@ export class OrderService {
 
       // Continue the order
       order.orderType = dto.orderType;
-
-      // Handle payment methods
-      // Handle payment methods
-      const payment = await this.paymentservice.PaymentService(order);
-
-      const receiptid = await this.generatorservice.generatereceiptID();
-
-      if (payment) {
-
-          // Prepare the items array for the receipt
-          const items = order.items.map((item) => ({
-            description: item.product.name,
-            quantity: item.quantity,
-            price: item.price,
-          }));
-          await this.mailer.sendOrderConfirmationWithReceipt(
-            order.user.email,
-            order.user.fullname,
-            order.trackingID,
-            receiptid,
-            items,
-            order.total,
-          );
-
-          //reccomend dispatch route 
-        await this.shiprocketservice.recommendDispatchService(order);
-
-      
-      }
-
-     
       order.name = dto.name;
       order.mobile = dto.mobile;
       order.billing_address = dto.billing_address;
@@ -361,7 +331,7 @@ export class OrderService {
 
       await this.orderRepo.save(order);
 
-      return 'the order has been successfully made, thanks for your patronage';
+      return 'the order has been successfully placed, Please Proceed to make Payment';
     } catch (error) {
       if (error instanceof NotFoundException)
         throw new NotFoundException(error.message);
@@ -374,6 +344,45 @@ export class OrderService {
           error.message,
         );
       }
+    }
+  }
+
+
+  async processPayment(orderID: string, dto: ProcessPaymentDto): Promise<string> {
+    const order = await this.orderRepo.findOne({
+      where: { id: orderID, isPaid: false },
+      relations: ['user', 'items','items.product'],
+    });
+    if (!order) throw new NotFoundException('order not found');
+    const receiptid = await this.generatorservice.generatereceiptID();
+
+    // Proceed with the selected payment gateway
+    const paymentResult = await this.paymentservice.processPayment(order.id,dto);
+
+    if (paymentResult.success) {
+      order.isPaid = true;
+      await this.orderRepo.save(order);
+
+         // Prepare the items array for the receipt and forward it to the user's mail
+         const items = order.items.map((item) => ({
+          description: item.product.name,
+          quantity: item.quantity,
+          price: item.price,
+        }));
+        await this.mailer.sendOrderConfirmationWithReceipt(
+          order.user.email,
+          order.user.fullname,
+          order.trackingID,
+          receiptid,
+          items,
+          order.total,
+        );
+           //reccomend dispatch route 
+           await this.shiprocketservice.recommendDispatchService(order);
+      return 'Payment successful';
+    } else {
+      console.log(error)
+      throw new Error('Payment failed',);
     }
   }
 }

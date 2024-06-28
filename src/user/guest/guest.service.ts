@@ -758,14 +758,14 @@ export class BrowseService {
       order.orderType = dto.orderType;
   
       // Handle payment methods
-      const payment = await this.paymentservice.PaymentService(order);
+      // const payment = await this.paymentservice.PaymentService(order);
 
-      if (payment){
-        await this.shiprocketservice.recommendDispatchService(order)
-      }
+      // if (payment){
+      //   await this.shiprocketservice.recommendDispatchService(order)
+      // }
      
   
-      order.paymentMethod = payment;
+      // order.paymentMethod = payment;
       order.name = dto.name;
       order.mobile = dto.mobile;
       order.billing_address = dto.billing_address;
