@@ -352,6 +352,11 @@ export class CartService {
       const order = await this.orderservice.CreateOrderFromCart(user);
       console.log('Order created from cart:', order);
 
+      //clear the cart and reset the checkout 
+      cart.isCheckedOut = false;
+      cart.items= [],
+      await this.cartRepo.save(cart)
+
       return {
         message:
           'Checkout successful. Order has been created, proceed to confirm order and select payment method.',
