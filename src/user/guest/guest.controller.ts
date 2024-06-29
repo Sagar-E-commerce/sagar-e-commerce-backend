@@ -198,4 +198,16 @@ export class BrowseController {
     return await this.browseservice.confirmGuestUserOrder(dto,orderID)
   }
 
+
+    @Get('get-coupons')
+    async GetCoupons(){
+        return await this.browseservice.GetCoupons()
+        
+    }
+
+    @Get('get-one-coupon/:couponID')
+    async GetOneCoupon(@Param('couponID')couponID:number){
+        return await this.browseservice.GetOneCoupon(couponID)
+    }
+
 }

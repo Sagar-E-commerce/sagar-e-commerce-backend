@@ -385,4 +385,53 @@ export class OrderService {
       throw new Error('Payment failed',);
     }
   }
+
+
+   //get all order
+   async GetAllOrder(user:UserEntity,page: number = 1, limit: number = 30) {
+    try {
+      const skip = (page - 1) * limit;
+      const orders = await this.orderRepo.findAndCount({
+        where:{user:{id:user.id}},
+        skip: skip,
+        take: limit,
+        relations: [ 'items','items.product'],
+      });
+      if (orders[1] === 0)
+        throw new NotFoundException('no orders have been posted at the moment');
+
+      return orders;
+    } catch (error) {
+      if (error instanceof NotFoundException)
+        throw new NotFoundException(error.message);
+      else {
+        console.log(error);
+        throw new InternalServerErrorException(
+          'something went wrong while trying to update order status, please try again later',error.message
+        );
+      }
+    }
+  }
+
+  //get one order
+  async GetOneOrder(user:UserEntity,orderID: string): Promise<IOrder> {
+    try {
+      const order = await this.orderRepo.findOne({
+        where: { user:{id:user.id},id: orderID },
+        relations: [ 'items','items.product'],
+      });
+      if (!order) throw new NotFoundException('order not found');
+
+      return order;
+    } catch (error) {
+      if (error instanceof NotFoundException)
+        throw new NotFoundException(error.message);
+      else {
+        console.log(error);
+        throw new InternalServerErrorException(
+          'something went wrong while trying to update order status, please try again later',error.message
+        );
+      }
+    }
+  }
 }

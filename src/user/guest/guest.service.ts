@@ -40,7 +40,7 @@ import {
   confirmOrderDto,
 } from '../dto/otherDto';
 import { OrderEntity } from 'src/Entity/order.entity';
-import { DiscountCouponEntity } from 'src/Entity/discountCoupon.entity';
+import { DiscountCouponEntity, IDiscountCoupon } from 'src/Entity/discountCoupon.entity';
 import { PaymentGatewaysService } from '../payment/payement-gatways.service';
 import { Mailer } from 'src/common/mailer/mailer.service';
 import { CartEntity, CartItemEntity } from 'src/Entity/cart.entity';
@@ -896,6 +896,53 @@ export class BrowseService {
         console.log(error);
         throw new InternalServerErrorException(
           'something went wrong while subscribing for news letter, please try again later',error.message
+        );
+      }
+    }
+  }
+
+
+  async GetCoupons() {
+    try {
+      //find  coupon
+      const coupons = await this.discountripo.findAndCount();
+
+      if (coupons[1]===0)
+        throw new NotFoundException(
+          `oops! no coupons have been created at the moment in Baby n' Stuff`,
+        );
+
+      return coupons;
+    } catch (error) {
+      if (error instanceof NotFoundException)
+        throw new NotFoundException(error.message);
+      else {
+        console.log(error);
+        throw new InternalServerErrorException(
+          'something went wrong while fetching coupons, please try again later',error.message
+        );
+      }
+    }
+  }
+
+  async GetOneCoupon(id:number) {
+    try {
+      //find  coupon
+      const coupons = await this.discountripo.findOne({where:{id:id}});
+
+      if (!coupons)
+        throw new NotFoundException(
+          `oops! coupon not found`,
+        );
+
+      return coupons;
+    } catch (error) {
+      if (error instanceof NotFoundException)
+        throw new NotFoundException(error.message);
+      else {
+        console.log(error);
+        throw new InternalServerErrorException(
+          'something went wrong while fetching coupons, please try again later',error.message
         );
       }
     }

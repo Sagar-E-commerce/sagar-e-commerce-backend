@@ -2,9 +2,12 @@ import {
     Body,
     Controller,
     Delete,
+    Get,
+    Param,
     Patch,
     Post,
     Put,
+    Query,
     Req,
     UploadedFile,
     UseGuards,
@@ -58,6 +61,16 @@ import { AdminAccessLevel } from 'src/auth/decorator/accesslevel.decorator';
     @Delete('delete-admin-account')
     async DeleteUserAccount(@Body() dto: confirmDeleteAccountDto, @Req() req) {
       return await this.profilemgtservice.DeleteUserAccount(dto, req.user);
+    }
+
+    @Get('all-notifications')
+    async GetAllNotifications(@Query('page')page:number, @Query('limit')limit:number){
+        return await this.profilemgtservice.fetchallNotifications(page,limit)
+    }
+
+    @Delete('delete-one-notification/:notificationID')
+    async OneNotification(@Param('notificationID')notificationID:number){
+        return await this.profilemgtservice.deleteOneNotifications(notificationID)
     }
   }
   

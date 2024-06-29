@@ -26,6 +26,17 @@ export class OrderController{
         return await this.orderservice.processPayment(orderID,dto)
     }
 
+    
+    @Get('get-all-my-orders')
+    async GetAllOrders(@Query('page')page:number, @Query('limit')limit:number,@Req()req){
+        return await this.orderservice.GetAllOrder(req.user,page,limit)
+    }
+
+    @Get('get-one-order/:orderID')
+    async GetOneOrder(@Param('orderID')orderID:string, @Req()req){
+        return await this.orderservice.GetOneOrder(req.user,orderID)
+    }
+
 
     
 
