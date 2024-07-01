@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Patch, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, Param, Patch, Query, UseGuards } from "@nestjs/common";
 import { InventoryService } from "./inventory.service";
 import { ThresholdDto, stockDto } from "src/admin/dto/otherDto";
 import { JwtGuard } from "src/auth/guard/jwt.guard";
@@ -28,7 +28,7 @@ export class InventoryController{
     }
 
     @Get('get-low-stock')
-    async LowStockTreshhold(@Body()dto:ThresholdDto){
-        return await this.inventoryservice.getLowStockProducts(dto)
+    async LowStockTreshhold(@Query('threshold')threshold:number){
+        return await this.inventoryservice.getLowStockProducts(threshold)
     }
 }

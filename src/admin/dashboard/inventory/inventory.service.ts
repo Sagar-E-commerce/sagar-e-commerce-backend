@@ -110,14 +110,14 @@ export class InventoryService {
   }
 
   //fetchlostocks
-  async getLowStockProducts(threshold: ThresholdDto) {
+  async getLowStockProducts(threshold: number) {
     try {
         const figure = await this.productRepo.findAndCount({
-          where: { stock: LessThan(threshold.threshold) },
-          relations:['video']
+          where: { stock: LessThan(threshold) },
+          relations:['category']
 
         });
-        if (figure[1]===0) throw new NotFoundException(`at the moment, there are no product stocks in the database that has less than ${threshold.threshold} stock quantities, maybe try a higher stock figure`)
+        if (figure[1]===0) throw new NotFoundException(`at the moment, there are no product stocks in the database that has less than ${threshold} stock quantities, maybe try a higher stock figure`)
 
         return figure
     } catch (error) {

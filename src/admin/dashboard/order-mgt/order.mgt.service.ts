@@ -176,7 +176,7 @@ export class OrderMgtService {
     try {
       const order = await this.orderRepo.findOne({
         where: { id: orderID },
-        relations: ['user', 'items'],
+        relations: ['user', 'items',"items.product"],
       });
       if (!order) throw new NotFoundException('order not found');
 
