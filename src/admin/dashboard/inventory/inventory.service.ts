@@ -28,7 +28,7 @@ export class InventoryService {
   async RestockProduct(dto: stockDto, productID: number): Promise<IProduct> {
     try {
       const product = await this.productRepo.findOne({
-        where: { id: productID },
+        where: { id: productID,  },relations:['category']
       });
       if (!product)
         throw new NotFoundException(`product with id ${productID} not found`);
@@ -72,7 +72,7 @@ export class InventoryService {
   ): Promise<IProduct> {
     try {
       const product = await this.productRepo.findOne({
-        where: { id: productID },
+        where: { id: productID },relations:['category']
       });
       if (!product)
         throw new NotFoundException(`product with id ${productID} not found`);
