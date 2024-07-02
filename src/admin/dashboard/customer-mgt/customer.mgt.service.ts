@@ -178,5 +178,10 @@ export class CustomerMgtService {
     }
   }
 
+  async CustomerCount():Promise<number>{
+    const customer = await this.userRepo.count()
+    return customer
+  }
+
   //resolve complaint
 }

@@ -500,4 +500,15 @@ export class OrderMgtService {
   }
 
 
+  async getRevenueFromSuccessfulOrders(): Promise<number> {
+    const successfulOrders = await this.orderRepo.find({
+      where: { isPaid:true },
+      select: ['total'],
+    });
+  
+    const totalRevenue = successfulOrders.reduce((sum, order) => sum + order.total, 0);
+    return totalRevenue;
+  }
+
+
 }

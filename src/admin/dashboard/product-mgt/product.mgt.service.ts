@@ -625,4 +625,24 @@ export class ProductMgtService {
       }
     }
   }
+
+  //product count , category count , total stock count  
+
+  async ProductCount():Promise<number>{
+    const count = await this.productRepo.count()
+    return count
+  }
+
+  async CategoryCount():Promise<number>{
+    const count = await this.categoryRepo.count()
+    return count
+  }
+
+  async PrdoductStockcount(): Promise<number> {
+    const products = await this.productRepo.find();
+    const totalStock = products.reduce((sum, product) => sum + product.stock, 0);
+    return totalStock;
+  }
+
+
 }

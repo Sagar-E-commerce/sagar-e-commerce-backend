@@ -109,6 +109,12 @@ export class OrderMgtcontroller{
         return await this.ordermgtservice.GetflatRate()
     }
 
+    @AdminAccessLevel(AdminAccessLevels.LEVEL3,AdminAccessLevels.LEVEL2,AdminAccessLevels.LEVEL1)
+    @Get('revenue')
+    async Revenue(){
+        return await this.ordermgtservice.getRevenueFromSuccessfulOrders()
+    }
+
 
 
 }

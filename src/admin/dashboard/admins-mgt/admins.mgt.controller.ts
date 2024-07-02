@@ -71,6 +71,11 @@ export class AdminMgtController{
 
     }
 
+    @Get('staff-count')
+    async Staffcount(){
+        return await this.adminsmgtservice.AdminCount()
+    }
+
 
   
 

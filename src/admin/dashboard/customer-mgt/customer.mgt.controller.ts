@@ -53,4 +53,9 @@ export class CustomerMgtController{
     async AllFeedbacks( @Query('limit')limit:number, @Query('page')page:number){
         return await this.cusomermgtservice.GetAllFeedbacks(page,limit)
     }
+
+    @Get('customer-count')
+    async CustomerCount(){
+        return await this.cusomermgtservice.CustomerCount()
+    }
 }

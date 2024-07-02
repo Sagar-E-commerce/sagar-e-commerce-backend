@@ -98,6 +98,23 @@ export class ProductMgtController{
         return await this.productngtservice.DeleteCategory(categoryID)
     }
 
+    @Get('product-count')
+    async ProductCount(){
+        return await this.productngtservice.ProductCount()
+    }
+
+    @Get('category-count')
+    async CategoryCount(){
+        return await this.productngtservice.CategoryCount()
+    }
+
+    @Get('product-stock-count')
+    async ProductStockCount(){
+        return await this.productngtservice.PrdoductStockcount()
+    }
+
+    
+
     
 
 

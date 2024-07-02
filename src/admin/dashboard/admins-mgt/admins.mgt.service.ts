@@ -295,6 +295,13 @@ export class AdminsMgtService {
     }
   }
 
+
+  async AdminCount():Promise<number>{
+    const staff = await this.adminripo.count({where:{admintype:AdminType.OTHER_ADMIN}})
+    return staff
+  }
+
+
   //deactivate admin's account
 
 }
