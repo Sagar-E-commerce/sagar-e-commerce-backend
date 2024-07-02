@@ -9,8 +9,18 @@ export class PaymentConfigurationEntity{
     @Column({ nullable: true , type:'enum', enum:PaymentGateways})
     selectedGateway: PaymentGateways;
 
+    @CreateDateColumn()
+    updatedAt:Date
 
-  
+}
+
+
+@Entity('cashfreeTable')
+export class CashFreeEntity{
+
+    @PrimaryGeneratedColumn()
+    id: number;
+
     @Column({ nullable: true })
     cashfreeApiKey: string;
   
@@ -33,7 +43,18 @@ export class PaymentConfigurationEntity{
     cashfreeAppId: string;
 
 
-  
+    @Column({nullable:true,type:'timestamp'})
+    updatedAt:Date
+
+}
+
+
+@Entity('RazorPayTable')
+export class RazorPayEntity{
+
+    @PrimaryGeneratedColumn()
+    id: number;
+
     @Column({ nullable: true })
     razorpayApiKey: string;
   
@@ -49,8 +70,18 @@ export class PaymentConfigurationEntity{
     @Column({nullable:true})
     razorpayKeySecret:string
 
+    @Column({nullable:true,type:'timestamp'})
+    updatedAt:Date
 
-  
+}
+
+@Entity('payUmoneyTable')
+export class PayUmoneyEntity{
+
+    @PrimaryGeneratedColumn()
+    id: number;
+
+
     @Column({ nullable: true })
     payumoneyApiKey: string;
   
@@ -75,11 +106,7 @@ export class PaymentConfigurationEntity{
     @Column({nullable:true})
     payumoneyAuthToken:string
 
-    @CreateDateColumn()
+    @Column({nullable:true,type:'timestamp'})
     updatedAt:Date
-
-
-
-
 
 }

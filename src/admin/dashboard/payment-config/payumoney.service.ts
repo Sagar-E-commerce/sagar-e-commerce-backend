@@ -3,7 +3,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { PaymentConfigurationEntity } from 'src/Entity/paymentConfig.entity';
+import { PayUmoneyEntity, PaymentConfigurationEntity } from 'src/Entity/paymentConfig.entity';
 import {
   PayUMoneyConfigDto,
   UpdatePaymentGatewayDto,
@@ -12,32 +12,84 @@ import { Repository } from 'typeorm';
 import axios from 'axios';
 import * as crypto from 'crypto';
 import { OrderEntity } from 'src/Entity/order.entity';
-import { OrderRepository } from 'src/user/user.repository';
+import { OrderRepository, PayUmoneyRepostory } from 'src/user/user.repository';
 
 export class PayUmoneyPaymentGatewayService {
   constructor(
-    @InjectRepository(PaymentConfigurationEntity)
-    private readonly paymentripo: Repository<PaymentConfigurationEntity>,
+    @InjectRepository(PayUmoneyEntity)
+    private readonly payUmoneyripo: PayUmoneyRepostory,
     @InjectRepository(OrderEntity) private readonly orderRepo: OrderRepository,
   ) {}
 
-  async getConfig(): Promise<PaymentConfigurationEntity> {
-    const config = await this.paymentripo.findOne({order:{updatedAt:'DESC'}});
+  async getConfig(): Promise<PayUmoneyEntity> {
+    const config = await this.payUmoneyripo.findOne({order:{updatedAt:'DESC'}});
     if (!config)
-      throw new NotFoundException('Payment gateway config not found');
+      throw new NotFoundException('PayUmoney gateway config not found');
     return config;
   }
 
-  async updateConfig(
+  async payUmoneyConfig(
     dto:  PayUMoneyConfigDto,
-  ): Promise<PaymentConfigurationEntity> {
-    let config = await this.getConfig()
-    if (!config) {
-      config = this.paymentripo.create(dto);
-    } else {
-      this.paymentripo.merge(config, dto);
+  ): Promise<PayUmoneyEntity> {
+
+    try {
+      const payUmoney = new PayUmoneyEntity();
+      payUmoney.payumoneyApiKey = dto.payumoneyApiKey;
+      payUmoney.payumoneyApiSecret = dto.payumoneyApiSecret;
+      payUmoney.payumoneyAuthToken = dto.payumoneyAuthToken;
+      payUmoney.payumoneyMerchantId = dto.payumoneyMerchantId;
+      payUmoney.payumoneyMerchantSalt = dto.payuMerchantSalt;
+      payUmoney.payumoneyWebhookSecret = dto.payuWebhookSecret;
+      payUmoney.payumoneyPaymentUrl = dto.payumoneyPaymentUrl;
+      payUmoney.updatedAt = new Date();
+
+      await this.payUmoneyripo.save(payUmoney);
+      return payUmoney;
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException(
+        'something went wrong while trying to configure payUmoney payment gateway',
+        error.message,
+      );
     }
-    return await this.paymentripo.save(config);
+    
+  }
+
+
+  async updatePayumoneyConfig(
+    dto:  PayUMoneyConfigDto,payUmoneyID:number
+  ): Promise<PayUmoneyEntity> {
+
+    try {
+      const payUmoney = await this.payUmoneyripo.findOne({
+        where: { id: payUmoneyID },
+      });
+      if (!payUmoney) throw new NotFoundException('not found');
+
+      payUmoney.payumoneyApiKey = dto.payumoneyApiKey;
+      payUmoney.payumoneyApiSecret = dto.payumoneyApiSecret;
+      payUmoney.payumoneyAuthToken = dto.payumoneyAuthToken;
+      payUmoney.payumoneyMerchantId = dto.payumoneyMerchantId;
+      payUmoney.payumoneyMerchantSalt = dto.payuMerchantSalt;
+      payUmoney.payumoneyWebhookSecret = dto.payuWebhookSecret;
+      payUmoney.payumoneyPaymentUrl = dto.payumoneyPaymentUrl;
+      payUmoney.updatedAt = new Date();
+
+      await this.payUmoneyripo.save(payUmoney);
+      return payUmoney;
+    } catch (error) {
+      console.log(error);
+      if (error instanceof NotFoundException)
+        throw new NotFoundException(error.message);
+      else {
+        console.log(error);
+        throw new InternalServerErrorException(
+          'something went wrong while trying to configure payUmoney payment gateway',
+          error.message,
+        );
+      }
+    }
+    
   }
 
 

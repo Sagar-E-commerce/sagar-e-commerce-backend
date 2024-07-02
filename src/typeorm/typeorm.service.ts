@@ -15,7 +15,7 @@ import { NewsLetterEntity } from 'src/Entity/newsletter.entity';
 import { Notifications } from 'src/Entity/notifications.entity';
 import { OrderEntity, OrderItemEntity } from 'src/Entity/order.entity';
 import { UserOtp } from 'src/Entity/otp.entity';
-import { PaymentConfigurationEntity } from 'src/Entity/paymentConfig.entity';
+import { CashFreeEntity, PayUmoneyEntity, PaymentConfigurationEntity, RazorPayEntity } from 'src/Entity/paymentConfig.entity';
 import { ProductAffiliateLinkEntity } from 'src/Entity/product-affliateLinks';
 import { CategoryEntity } from 'src/Entity/productCategory.entity';
 import { ProductEntity } from 'src/Entity/products.entity';
@@ -57,7 +57,10 @@ export class TypeOrmService {
         FavouriteEntity,
         PaymentConfigurationEntity,
         AffiliateEntity,
-        ProductAffiliateLinkEntity
+        ProductAffiliateLinkEntity,
+        RazorPayEntity,
+        CashFreeEntity,
+        PayUmoneyEntity
       ],
       migrations: [],
       subscribers: [],

@@ -34,7 +34,7 @@ import { NewsLetterEntity } from 'src/Entity/newsletter.entity';
 import { FeddbackEntity } from 'src/Entity/feedback.entity';
 import { AdminMgtController } from './dashboard/admins-mgt/admins.mgt.controller';
 import { AdminsMgtService } from './dashboard/admins-mgt/admins.mgt.service';
-import { PaymentConfigurationEntity } from 'src/Entity/paymentConfig.entity';
+import { CashFreeEntity, PayUmoneyEntity, PaymentConfigurationEntity, RazorPayEntity } from 'src/Entity/paymentConfig.entity';
 import { RazorPayPaymentGatewayService } from './dashboard/payment-config/razorpay.service';
 import { CashfreePaymentGatewayService } from './dashboard/payment-config/cashfree.service';
 import { PayUmoneyPaymentGatewayService } from './dashboard/payment-config/payumoney.service';
@@ -60,7 +60,10 @@ import { ShiprocketService } from 'src/common/services/shiprocket.service';
       NewsLetterEntity,
       FeddbackEntity,
       PaymentConfigurationEntity,
-      ShiprocketService
+      RazorPayEntity,
+      CashFreeEntity,
+      PayUmoneyEntity,
+      
     ]),
   ],
   providers: [
@@ -81,7 +84,8 @@ import { ShiprocketService } from 'src/common/services/shiprocket.service';
     RazorPayPaymentGatewayService,
     CashfreePaymentGatewayService,
     PayUmoneyPaymentGatewayService,
-    UpdatePaymentGatewayConfigService
+    UpdatePaymentGatewayConfigService,
+    ShiprocketService
   ],
   controllers: [
     AdminAuthController,

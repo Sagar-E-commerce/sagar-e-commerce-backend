@@ -46,6 +46,28 @@ export class RazorpayConfigDto {
     razorpayApiKey: string;
   }
 
+  export class UpdateRazorpayConfigDto {
+    @IsString()
+    @IsOptional()
+    razorpayKeyId: string;
+  
+    @IsString()
+    @IsOptional()
+    razorpayKeySecret: string;
+  
+    @IsString()
+    @IsOptional()
+    razorpayWebhookSecret: string;
+
+    @IsString()
+    @IsOptional()
+    razorpayApiSecret: string;
+
+    @IsString()
+    @IsOptional()
+    razorpayApiKey: string;
+  }
+
 
   export class PayUMoneyConfigDto {
     @IsString()
@@ -55,7 +77,7 @@ export class RazorpayConfigDto {
     payuMerchantSalt: string;
   
     @IsString()
-    payuWebhookSalt: string;
+    payuWebhookSecret: string;
 
     @IsString()
     payumoneyMerchantId: string;
@@ -70,6 +92,42 @@ export class RazorpayConfigDto {
     payumoneyAuthToken:string
 
     @IsString()
+    payumoneyPaymentUrl:string
+  
+
+  }
+
+  export class UpdatePayUMoneyConfigDto {
+    @IsString()
+    @IsOptional()
+    payuMerchantKey: string;
+  
+    @IsString()
+    @IsOptional()
+    payuMerchantSalt: string;
+  
+    @IsString()
+    @IsOptional()
+    payuWebhookSalt: string;
+
+    @IsString()
+    @IsOptional()
+    payumoneyMerchantId: string;
+
+    @IsString()
+    @IsOptional()
+    payumoneyApiKey: string;
+
+    @IsString()
+    @IsOptional()
+    payumoneyApiSecret: string;
+
+    @IsString()
+    @IsOptional()
+    payumoneyAuthToken:string
+
+    @IsString()
+    @IsOptional()
     payumoneyPaymentUrl:string
   
 
@@ -97,6 +155,45 @@ export class RazorpayConfigDto {
 
     @IsString()
     cashfreeApiSecret: string;
+
+    @IsString()
+    cashfreeApiKey:string
+
+  }
+
+
+  export class UpdateCashfreeConfigDto {
+    @IsString()
+    @IsOptional()
+    cashfreeAppId: string;
+  
+    @IsString()
+    @IsOptional()
+    cashfreeSecretKey: string;
+  
+    @IsString()
+    @IsOptional()
+    cashfreeWebhookSecret: string;
+
+    @IsString()
+    @IsOptional()
+    cashfreeClientId:string
+
+    @IsString()
+    @IsOptional()
+    cashfreeClientSecret:string
+
+    @IsString()
+    @IsOptional()
+    cashfreePaymentUrl:string
+
+    @IsString()
+    @IsOptional()
+    cashfreeApiSecret: string;
+
+    @IsString()
+    @IsOptional()
+    cashfreeApiKey:string
 
   }
 

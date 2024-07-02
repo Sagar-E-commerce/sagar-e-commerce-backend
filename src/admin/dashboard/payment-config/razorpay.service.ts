@@ -3,45 +3,95 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { PaymentConfigurationEntity } from 'src/Entity/paymentConfig.entity';
+import {
+  PaymentConfigurationEntity,
+  RazorPayEntity,
+} from 'src/Entity/paymentConfig.entity';
 import {
   RazorpayConfigDto,
   UpdatePaymentGatewayDto,
+  UpdateRazorpayConfigDto,
 } from 'src/admin/dto/payment-config.dto';
 import { Repository } from 'typeorm';
 import * as crypto from 'crypto';
 import axios from 'axios';
 import { OrderEntity } from 'src/Entity/order.entity';
-import { OrderRepository, PaymentConfigurationRepository } from 'src/user/user.repository';
+import {
+  OrderRepository,
+  PaymentConfigurationRepository,
+  RazorPayRepository,
+} from 'src/user/user.repository';
 import Razorpay from 'razorpay';
 
 export class RazorPayPaymentGatewayService {
   private razorpay: any;
 
   constructor(
-    @InjectRepository(PaymentConfigurationEntity)
-    private readonly paymentripo: PaymentConfigurationRepository,
+    @InjectRepository(RazorPayEntity)
+    private readonly razorpayripo: RazorPayRepository,
     @InjectRepository(OrderEntity) private readonly orderRepo: OrderRepository,
   ) {
     //this.initializeRazorpay();
   }
 
+  async getConfig(): Promise<RazorPayEntity> {
+    const config = await this.razorpayripo.findOne({
+      order: { updatedAt: 'DESC' },
+    });
+    if (!config)
+      throw new NotFoundException('Payment gateway config not found');
+    return config;
+  }
 
-  
+  async ConfigureRazorPay(dto: RazorpayConfigDto): Promise<RazorPayEntity> {
+    try {
+      const razorpay = new RazorPayEntity();
+      razorpay.razorpayApiKey = dto.razorpayApiKey;
+      razorpay.razorpayApiSecret = dto.razorpayApiSecret;
+      razorpay.razorpayKeyId = dto.razorpayKeyId;
+      razorpay.razorpayWebhookSecret = dto.razorpayWebhookSecret;
+      razorpay.updatedAt = new Date();
 
-  async updateConfigRazorPay(
-    dto: RazorpayConfigDto,
-  ): Promise<PaymentConfigurationEntity> {
-    let [config] = await this.paymentripo.find({
-      order:{updatedAt:'DESC'},
-      take:1
-    })
-    if (!config) {
-      config = this.paymentripo.create(dto);
-    } else {
-      this.paymentripo.merge(config, dto);
+      await this.razorpay.save(razorpay);
+      return razorpay;
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException(
+        'something went wrong while trying to configure cashfree payment gateway',
+        error.message,
+      );
     }
-    return await this.paymentripo.save(config);
+  }
+
+  async UpdateConfigureRazorPay(
+    dto: UpdateRazorpayConfigDto,
+    razorpayID: number,
+  ): Promise<RazorPayEntity> {
+    try {
+      const razorpay = await this.razorpayripo.findOne({
+        where: { id: razorpayID },
+      });
+      if (!razorpay) throw new NotFoundException('not found');
+
+      razorpay.razorpayApiKey = dto.razorpayApiKey;
+      razorpay.razorpayApiSecret = dto.razorpayApiSecret;
+      razorpay.razorpayKeyId = dto.razorpayKeyId;
+      razorpay.razorpayWebhookSecret = dto.razorpayWebhookSecret;
+      razorpay.updatedAt = new Date();
+
+      await this.razorpay.save(razorpay);
+      return razorpay;
+    } catch (error) {
+      if (error instanceof NotFoundException)
+        throw new NotFoundException(error.message);
+      else {
+        console.log(error);
+        throw new InternalServerErrorException(
+          'something went wrong while trying to configure razorpay payment gateway',
+          error.message,
+        );
+      }
+    }
   }
 
   // private async initializeRazorpay() {
@@ -49,7 +99,7 @@ export class RazorPayPaymentGatewayService {
   //   if (!config) {
   //     throw new Error('No payment configuration found. Please configure Razorpay first.');
   //   }
-  
+
   //   this.razorpay = new Razorpay({
   //     key_id: config.razorpayApiKey,
   //     key_secret: config.razorpayApiSecret,
@@ -57,10 +107,7 @@ export class RazorPayPaymentGatewayService {
   // }
 
   async createPaymentRazorpay(orderDetails: OrderEntity): Promise<any> {
-    const [config] = await this.paymentripo.find({
-      order:{updatedAt:'DESC'},
-      take:1
-    })
+  const config = await this.getConfig()
     const order = await this.orderRepo.findOne({
       where: { id: orderDetails.id },
       relations: ['user', 'items'],
@@ -101,10 +148,10 @@ export class RazorPayPaymentGatewayService {
 
   //for the customer after their payment
   async handleRazorpayWebhook(req: any, res: any): Promise<void> {
-    const [config] = await this.paymentripo.find({
-      order:{updatedAt:'DESC'},
-      take:1
-    })
+    const [config] = await this.razorpayripo.find({
+      order: { updatedAt: 'DESC' },
+      take: 1,
+    });
     const secret = config.razorpayWebhookSecret;
 
     const shasum = crypto.createHmac('sha256', secret);

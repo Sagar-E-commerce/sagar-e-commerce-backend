@@ -3,7 +3,7 @@ import { RazorPayPaymentGatewayService } from "./razorpay.service";
 import { CashfreePaymentGatewayService } from "./cashfree.service";
 import { PayUmoneyPaymentGatewayService } from "./payumoney.service";
 import { UpdatePaymentGatewayConfigService } from "./update-payment.service";
-import { CashfreeConfigDto, PayUMoneyConfigDto, RazorpayConfigDto, UpdatePaymentGatewayDto } from "src/admin/dto/payment-config.dto";
+import { CashfreeConfigDto, PayUMoneyConfigDto, RazorpayConfigDto, UpdateCashfreeConfigDto, UpdatePaymentGatewayDto } from "src/admin/dto/payment-config.dto";
 import { Request, Response } from 'express';
 import { JwtGuard } from "src/auth/guard/jwt.guard";
 import { RoleGuard } from "src/auth/guard/role.guard";
@@ -32,22 +32,58 @@ export class PaymentGateWayController{
 
     //  config payment gateways 
 
-    @Patch('/razorPay')
+    @Post('/razorPay')
     async configureRazorPay(@Body()dto:RazorpayConfigDto){
-        return await this.razorpaymentservice.updateConfigRazorPay(dto)
+        return await this.razorpaymentservice.ConfigureRazorPay(dto)
 
     }
 
-    @Patch('/cashfree')
+
+    @Patch('/razorPay/:razorpayID')
+    async UpdateconfigureRazorPay(@Body()dto:RazorpayConfigDto,@Param('razorpayID')razorpayID:number){
+        return await this.razorpaymentservice.UpdateConfigureRazorPay(dto,razorpayID)
+
+    }
+
+    @Get('get-razorpay')
+    async getRazorPay(){
+        return await this.razorpaymentservice.getConfig()
+    }
+
+
+
+    @Post('/cashfree')
     async configureCashFree(@Body()dto:CashfreeConfigDto){
-        return await this.cashfreepaymentservice.updateConfigCashfree(dto)
+        return await this.cashfreepaymentservice.ConfigureCashfree(dto)
 
     }
 
-    @Patch('/payUmoney')
-    async configurePayUmoney(@Body()dto: PayUMoneyConfigDto ){
-        return await this.payUmoneypaymentservice.updateConfig(dto)
+    @Patch('/update-cashfree/:cashfreeID')
+    async updateCashFree(@Body()dto:UpdateCashfreeConfigDto, @Param('cashfreeID')cashfreeID:number){
+        return await this.cashfreepaymentservice.UpdateConfigurationCashfree(dto,cashfreeID)
 
+    }
+
+    @Get('get-cashfree')
+    async getCashfree(){
+        return await this.cashfreepaymentservice.getConfig()
+    }
+
+    @Post('/payUmoney')
+    async configurePayUmoney(@Body()dto: PayUMoneyConfigDto ){
+        return await this.payUmoneypaymentservice.payUmoneyConfig(dto)
+
+    }
+
+    @Patch('/payUmoney/:payUmoneyID')
+    async UpdatePayUmoney(@Body()dto: PayUMoneyConfigDto, @Param('payUmoneyID')payUmoneyID:number ){
+        return await this.payUmoneypaymentservice.updatePayumoneyConfig(dto, payUmoneyID)
+
+    }
+
+    @Get('get-payUmoney')
+    async getPayUmoney(){
+        return await this.payUmoneypaymentservice.getConfig()
     }
 
 

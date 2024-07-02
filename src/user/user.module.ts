@@ -34,7 +34,7 @@ import { FavouriteEntity } from 'src/Entity/likes.entity';
 import { CurrencyController } from './currency-converter/converter.controller';
 import { CurrencyService } from './currency-converter/converter.service';
 import { ShiprocketService } from 'src/common/services/shiprocket.service';
-import { PaymentConfigurationEntity } from 'src/Entity/paymentConfig.entity';
+import { CashFreeEntity, PayUmoneyEntity, PaymentConfigurationEntity, RazorPayEntity } from 'src/Entity/paymentConfig.entity';
 import { RazorPayPaymentGatewayService } from 'src/admin/dashboard/payment-config/razorpay.service';
 import { CashfreePaymentGatewayService } from 'src/admin/dashboard/payment-config/cashfree.service';
 import { PayUmoneyPaymentGatewayService } from 'src/admin/dashboard/payment-config/payumoney.service';
@@ -58,7 +58,10 @@ import { PayUmoneyPaymentGatewayService } from 'src/admin/dashboard/payment-conf
       FeddbackEntity,
       FavouriteEntity,
       ShippingFlatRateEntity,
-      PaymentConfigurationEntity
+      PaymentConfigurationEntity,
+      RazorPayEntity,
+      CashFreeEntity,
+      PayUmoneyEntity
     ]),
   ],
   controllers: [
