@@ -33,10 +33,20 @@ export class BrowseController {
     @Query('perPage') perPage?: number,
     @Query('sort') sort?: string,
     
-    
-    
   ) {
     return this.browseservice.searchProducts(
+      keyword,page,perPage,sort)
+  }
+
+  @Get('search-category')
+  async searchCategories(
+    @Query('keyword') keyword: string,
+    @Query('page') page?: number,
+    @Query('perPage') perPage?: number,
+    @Query('sort') sort?: string,
+    
+  ) {
+    return this.browseservice.searchCategories(
       keyword,page,perPage,sort)
   }
 

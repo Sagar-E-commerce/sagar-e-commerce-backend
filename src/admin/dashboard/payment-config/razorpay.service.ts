@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
@@ -24,7 +25,7 @@ import {
 import Razorpay from 'razorpay';
 
 export class RazorPayPaymentGatewayService {
-  private razorpay: any;
+  //private razorpay: any;
 
   constructor(
     @InjectRepository(RazorPayEntity)
@@ -52,7 +53,7 @@ export class RazorPayPaymentGatewayService {
       razorpay.razorpayWebhookSecret = dto.razorpayWebhookSecret;
       razorpay.updatedAt = new Date();
 
-      await this.razorpay.save(razorpay);
+      await this.razorpayripo.save(razorpay);
       return razorpay;
     } catch (error) {
       console.log(error);
@@ -79,7 +80,7 @@ export class RazorPayPaymentGatewayService {
       razorpay.razorpayWebhookSecret = dto.razorpayWebhookSecret;
       razorpay.updatedAt = new Date();
 
-      await this.razorpay.save(razorpay);
+      await this.razorpayripo.save(razorpay);
       return razorpay;
     } catch (error) {
       if (error instanceof NotFoundException)
@@ -107,11 +108,15 @@ export class RazorPayPaymentGatewayService {
   // }
 
   async createPaymentRazorpay(orderDetails: OrderEntity): Promise<any> {
-  const config = await this.getConfig()
+  //const config = await this.getConfig()
+  console.log('Received order details:', orderDetails);
+
+  
     const order = await this.orderRepo.findOne({
       where: { id: orderDetails.id },
       relations: ['user', 'items'],
     });
+    console.log(order)
     if (!order)
       throw new NotFoundException(
         `The order with the ID ${orderDetails.id} does not exist`,
@@ -120,7 +125,7 @@ export class RazorPayPaymentGatewayService {
     const payload = {
       amount: order.total * 100, // Razorpay expects amount in paise
       currency: 'INR',
-      receipt: `order_rcptid_${order.id}`,
+      receipt: `order_rcptid_${order.orderID}`,
       payment_capture: 1,
     };
 
@@ -130,8 +135,8 @@ export class RazorPayPaymentGatewayService {
         payload,
         {
           auth: {
-            username: config.razorpayKeyId,
-            password: config.razorpayKeySecret,
+            username: 'rzp_test_bDdQERgqRC29ej',
+            password: 'rIMX9vBRQccaNkxkQnjJ9JdF'
           },
         },
       );

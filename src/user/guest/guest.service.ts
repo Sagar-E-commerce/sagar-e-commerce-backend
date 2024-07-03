@@ -271,6 +271,54 @@ export class BrowseService {
       }
     }
   }
+
+  async searchCategories(
+    keyword: string,
+    page?: number,
+    perPage?: number,
+    sort?: string,
+    // Add filter options here (e.g., category, price range)
+  ): Promise<{ data: CategoryEntity[]; total: number }> {
+    try {
+      const qb = this.categoryRepo.createQueryBuilder('category');
+  
+      qb.where('category.name ILIKE :keyword', { keyword: `%${keyword}%`});
+
+      qb.cache(false)
+  
+      // Add filtering based on additional criteria here
+      // ...
+
+  
+      if (sort) {
+        const [sortField] = sort.split(',');
+        qb.orderBy(`category.${sortField}`, 'DESC');
+      }
+  
+      if (page && perPage) {
+        qb.skip((page - 1) * perPage).take(perPage);
+      }
+  
+      const [category, total] = await qb.getManyAndCount();
+  
+      if (!category.length) {
+        throw new NotFoundException(
+          `No category found matching your search criteria for "${keyword}".`,
+        );
+      }
+  
+      return { data: category, total };
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      } else {
+        console.error(error);
+        throw new InternalServerErrorException(
+          'An error occurred while searching for products. Please try again later.',
+        );
+      }
+    }
+  }
   
 
   //fetch all product categories
