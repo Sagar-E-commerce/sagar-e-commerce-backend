@@ -23,26 +23,27 @@ import {
   RazorPayRepository,
 } from 'src/user/user.repository';
 import Razorpay from 'razorpay';
+import { Mailer } from 'src/common/mailer/mailer.service';
+import { GeneatorService } from 'src/common/services/generator.service';
 
 export class RazorPayPaymentGatewayService {
-  //private razorpay: any;
 
   constructor(
     @InjectRepository(RazorPayEntity)
     private readonly razorpayripo: RazorPayRepository,
     @InjectRepository(OrderEntity) private readonly orderRepo: OrderRepository,
-  ) {
-    //this.initializeRazorpay();
+    private generatorservice: GeneatorService,
+    private mailer: Mailer  ) {
   }
 
-  async getConfig(): Promise<RazorPayEntity> {
-    const config = await this.razorpayripo.findOne({
-      order: { updatedAt: 'DESC' },
-    });
-    if (!config)
-      throw new NotFoundException('Payment gateway config not found');
-    return config;
-  }
+  // async getConfig(): Promise<RazorPayEntity> {
+  //   const config = await this.razorpayripo.findOne({
+  //     order: { updatedAt: 'DESC' },
+  //   });
+  //   if (!config)
+  //     throw new NotFoundException('Payment gateway config not found');
+  //   return config;
+  // }
 
   async ConfigureRazorPay(dto: RazorpayConfigDto): Promise<RazorPayEntity> {
     try {
@@ -95,28 +96,14 @@ export class RazorPayPaymentGatewayService {
     }
   }
 
-  // private async initializeRazorpay() {
-  //   let config = await this.paymentripo.findOne({ order: { updatedAt: 'DESC' } });
-  //   if (!config) {
-  //     throw new Error('No payment configuration found. Please configure Razorpay first.');
-  //   }
 
-  //   this.razorpay = new Razorpay({
-  //     key_id: config.razorpayApiKey,
-  //     key_secret: config.razorpayApiSecret,
-  //   });
-  // }
 
   async createPaymentRazorpay(orderDetails: OrderEntity): Promise<any> {
-  //const config = await this.getConfig()
-  console.log('Received order details:', orderDetails);
 
-  
     const order = await this.orderRepo.findOne({
       where: { id: orderDetails.id },
       relations: ['user', 'items'],
     });
-    console.log(order)
     if (!order)
       throw new NotFoundException(
         `The order with the ID ${orderDetails.id} does not exist`,
@@ -141,7 +128,16 @@ export class RazorPayPaymentGatewayService {
         },
       );
 
-      return response.data;
+      // Return the order ID and other necessary info to redirect the user
+      return {
+          success: true,
+          orderID: response.data.id,
+          amount: payload.amount,
+          currency: payload.currency,
+          receipt: payload.receipt,
+          gateway: 'razorpay',
+          redirectUrl: `https://checkout.razorpay.com/v1/checkout.js?order_id=${response.data.id}`
+      }
     } catch (error) {
       console.log(error);
       throw new InternalServerErrorException(
@@ -150,6 +146,8 @@ export class RazorPayPaymentGatewayService {
       );
     }
   }
+
+
 
   //for the customer after their payment
   async handleRazorpayWebhook(req: any, res: any): Promise<void> {
@@ -178,6 +176,27 @@ export class RazorPayPaymentGatewayService {
       if (order) {
         order.isPaid = true;
         await this.orderRepo.save(order);
+
+ 
+       // Prepare the items array for the receipt and forward it to the user's mail
+       const items = order.items.map((item) => ({
+         description: item.product.name,
+         quantity: item.quantity,
+         price: typeof item.price === 'number' ? item.price : parseFloat(item.price),
+       }));
+
+       const receiptid = await this.generatorservice.generatereceiptID()
+       const total = typeof order.total === 'number' ? order.total : parseFloat(order.total);
+       await this.mailer.sendOrderConfirmationWithReceipt(
+         order.user.email,
+         order.user.fullname,
+         order.trackingID,
+         receiptid,
+         items,
+         total,
+       );
+       //reccomend dispatch route
+       //await this.shiprocketservice.recommendDispatchService(order);
       }
     }
 

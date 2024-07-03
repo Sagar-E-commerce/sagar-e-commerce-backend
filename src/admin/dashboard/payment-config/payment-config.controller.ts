@@ -45,10 +45,10 @@ export class PaymentGateWayController{
 
     }
 
-    @Get('get-razorpay')
-    async getRazorPay(){
-        return await this.razorpaymentservice.getConfig()
-    }
+    // @Get('get-razorpay')
+    // async getRazorPay(){
+    //     return await this.razorpaymentservice.getConfig()
+    // }
 
 
 

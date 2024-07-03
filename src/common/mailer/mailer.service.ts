@@ -689,7 +689,16 @@ async sendOrderConfirmationWithReceipt(
     </html>
   `;
 
-  const pdfBuffer = await this.createReceiptPdf(receiptId, name, items, total);
+    // Ensure price is a number
+    const processedItems = items.map((item) => ({
+      ...item,
+      price: typeof item.price === 'number' ? item.price : parseFloat(item.price),
+    }));
+
+    const processedTotal = typeof total === 'number' ? total : parseFloat(total);
+
+
+  const pdfBuffer = await this.createReceiptPdf(receiptId, name, processedItems, processedTotal);
 
   await this.mailerservice.sendMail({
     to: email,

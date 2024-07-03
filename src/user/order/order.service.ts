@@ -31,7 +31,12 @@ import { IOrder } from './order';
 import { GeneatorService } from 'src/common/services/generator.service';
 import { Mailer } from 'src/common/mailer/mailer.service';
 import { OrderStatus, paymentType } from 'src/Enums/all-enums';
-import { FedbackDto, NewsLetterDto, ProcessPaymentDto, confirmOrderDto } from '../dto/otherDto';
+import {
+  FedbackDto,
+  NewsLetterDto,
+  ProcessPaymentDto,
+  confirmOrderDto,
+} from '../dto/otherDto';
 import {
   DiscountCouponEntity,
   DiscountUsageEntity,
@@ -280,11 +285,7 @@ export class OrderService {
   }
 
   //guarded user
-  async confirmOrder(
-    User: UserEntity,
-    dto: confirmOrderDto,
-    orderID: string,
-  ){
+  async confirmOrder(User: UserEntity, dto: confirmOrderDto, orderID: string) {
     try {
       const order = await this.orderRepo.findOne({
         where: { id: orderID, user: User, isPaid: false },
@@ -328,10 +329,16 @@ export class OrderService {
       order.mobile = dto.mobile;
       order.billing_address = dto.billing_address;
       order.email = dto.email;
+      order.dropoffpincode = dto.dropOffpincode;
+      order.pickuppincode = dto.pickUppincode
 
       await this.orderRepo.save(order);
 
-      return {message:'the order has been successfully placed, Please Proceed to make Payment',order};
+      return {
+        message:
+          'the order has been successfully placed, Please Proceed to make Payment',
+        order,
+      };
     } catch (error) {
       if (error instanceof NotFoundException)
         throw new NotFoundException(error.message);
@@ -347,57 +354,46 @@ export class OrderService {
     }
   }
 
-  
+  async processPayment(
+    orderID: string,
+    dto: ProcessPaymentDto,
+  ){
+   try {
+     const order = await this.orderRepo.findOne({
+       where: { id: orderID, isPaid: false },
+       relations: ['user', 'items', 'items.product'],
+     });
+     if (!order) throw new NotFoundException('order not found');
+ 
+     //roceed with the selected payment gateway
+     const paymentResult = await this.paymentservice.processPayment(
+       order.id,
+       dto,
+     );
 
+    
+ 
+    //  if (paymentResult.success) {
+    
 
-  async processPayment(orderID: string, dto: ProcessPaymentDto): Promise<string> {
-    const order = await this.orderRepo.findOne({
-      where: { id: orderID, isPaid: false },
-      relations: ['user', 'items','items.product'],
-    });
-    if (!order) throw new NotFoundException('order not found');
-    const receiptid = await this.generatorservice.generatereceiptID();
-
-    // Proceed with the selected payment gateway
-    const paymentResult = await this.paymentservice.processPayment(order.id,dto);
-
-    if (paymentResult.success) {
-      order.isPaid = true;
-      await this.orderRepo.save(order);
-
-         // Prepare the items array for the receipt and forward it to the user's mail
-         const items = order.items.map((item) => ({
-          description: item.product.name,
-          quantity: item.quantity,
-          price: item.price,
-        }));
-        await this.mailer.sendOrderConfirmationWithReceipt(
-          order.user.email,
-          order.user.fullname,
-          order.trackingID,
-          receiptid,
-          items,
-          order.total,
-        );
-           //reccomend dispatch route 
-           await this.shiprocketservice.recommendDispatchService(order);
-      return 'Payment successful';
-    } else {
-      console.log(error)
-      throw new Error('Payment failed',);
-    }
+       return paymentResult;
+     
+   } catch (error) {
+    console.log(error)
+    throw new InternalServerErrorException('something went wrong', error.message)
+    
+   }
   }
 
-
-   //get all order
-   async GetAllOrder(user:UserEntity,page: number = 1, limit: number = 30) {
+  //get all order
+  async GetAllOrder(user: UserEntity, page: number = 1, limit: number = 30) {
     try {
       const skip = (page - 1) * limit;
       const orders = await this.orderRepo.findAndCount({
-        where:{user:{id:user.id}},
+        where: { user: { id: user.id } },
         skip: skip,
         take: limit,
-        relations: [ 'items','items.product'],
+        relations: ['items', 'items.product'],
       });
       if (orders[1] === 0)
         throw new NotFoundException('no orders have been posted at the moment');
@@ -409,18 +405,19 @@ export class OrderService {
       else {
         console.log(error);
         throw new InternalServerErrorException(
-          'something went wrong while trying to update order status, please try again later',error.message
+          'something went wrong while trying to update order status, please try again later',
+          error.message,
         );
       }
     }
   }
 
   //get one order
-  async GetOneOrder(user:UserEntity,orderID: string): Promise<IOrder> {
+  async GetOneOrder(user: UserEntity, orderID: string): Promise<IOrder> {
     try {
       const order = await this.orderRepo.findOne({
-        where: { user:{id:user.id},id: orderID },
-        relations: [ 'items','items.product'],
+        where: { user: { id: user.id }, id: orderID },
+        relations: ['items', 'items.product'],
       });
       if (!order) throw new NotFoundException('order not found');
 
@@ -431,7 +428,8 @@ export class OrderService {
       else {
         console.log(error);
         throw new InternalServerErrorException(
-          'something went wrong while trying to update order status, please try again later',error.message
+          'something went wrong while trying to update order status, please try again later',
+          error.message,
         );
       }
     }

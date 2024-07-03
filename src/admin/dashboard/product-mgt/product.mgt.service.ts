@@ -640,9 +640,8 @@ export class ProductMgtService {
 
   async PrdoductStockcount(): Promise<number> {
     const products = await this.productRepo.find();
-    const totalStock = products.reduce((sum, product) => sum + product.stock, 0);
+    const totalStock = products.reduce((sum, product) => sum + (product.stock || 0), 0);
     return totalStock;
   }
-
 
 }
