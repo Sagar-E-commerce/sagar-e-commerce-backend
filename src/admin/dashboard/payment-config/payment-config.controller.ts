@@ -10,8 +10,8 @@ import { RoleGuard } from "src/auth/guard/role.guard";
 import { Role } from "src/Enums/all-enums";
 import { Roles } from "src/auth/decorator/role.decorator";
 
-@UseGuards(JwtGuard,RoleGuard)
-@Roles(Role.ADMIN)
+// @UseGuards(JwtGuard,RoleGuard)
+// @Roles(Role.ADMIN)
 @Controller('payment-gateway-config')
 export class PaymentGateWayController{
     constructor(private readonly razorpaymentservice:RazorPayPaymentGatewayService,
@@ -20,9 +20,14 @@ export class PaymentGateWayController{
         private readonly updatepaymentgtewayservice:UpdatePaymentGatewayConfigService
     ){}
 
-    @Get('payment-config')
+    @Get('/payment-config')
     async GetPaymetConfig(){
         return await this.updatepaymentgtewayservice.getConfig()
+    }
+
+    @Post("/first-click-to-set-gateway")
+    async createGateway(@Body() dto: UpdatePaymentGatewayDto,) {
+      return await this.updatepaymentgtewayservice.firstclicktoSelectPaymentGateway(dto);
     }
 
     @Patch('/select-gateway/:id')

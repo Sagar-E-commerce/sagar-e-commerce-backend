@@ -365,6 +365,8 @@ export class ProductMgtService {
         await this.categoryRepo.save(products.category);
       }
 
+      
+
       await this.productRepo.remove(products);
 
       //save the notification

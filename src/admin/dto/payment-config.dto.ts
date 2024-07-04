@@ -1,11 +1,11 @@
 import { Type } from 'class-transformer';
-import { IsEnum, IsOptional, IsString, ValidateNested } from 'class-validator';
+import { IsEnum, IsNotEmpty, IsOptional, IsString, ValidateNested } from 'class-validator';
 import { PaymentGateways } from 'src/Enums/all-enums';
 
 export class UpdatePaymentGatewayDto {
-  @IsOptional()
+  @IsNotEmpty()
   @IsEnum(PaymentGateways)
-  selectedGateway?: PaymentGateways;
+  selectedGateway: PaymentGateways;
 
 }
 

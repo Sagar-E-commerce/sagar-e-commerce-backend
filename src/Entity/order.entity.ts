@@ -78,7 +78,6 @@ export class OrderEntity implements IOrder {
   @Column('decimal',{nullable:true})
   weight: number
 
-
 }
 
 @Entity('order_items')
@@ -89,7 +88,7 @@ export class OrderItemEntity implements IOrderItem{
   @ManyToOne(() => OrderEntity, (order) => order.items)
   order: OrderEntity;
 
-  @ManyToOne(() => ProductEntity)
+  @ManyToOne(() => ProductEntity,{onDelete:'CASCADE'})
   product: ProductEntity;
 
   @Column('int',{nullable:true})
