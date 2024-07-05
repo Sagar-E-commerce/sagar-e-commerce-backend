@@ -13,13 +13,18 @@ import { RegisterAdminDto, RegisterOtherAdminDto } from 'src/admin/dto/authDto';
 import { AdminEntity } from 'src/Entity/admin.entity';
 import { Notifications } from 'src/Entity/notifications.entity';
 import { NotificationRepository } from 'src/common/common.repositories';
-import { AdminRepository } from 'src/admin/admin.repository';
+import {
+  AdminRepository,
+  PassCodeRepository,
+} from 'src/admin/admin.repository';
 import { IAdmin } from 'src/admin/admin';
 import { ILike } from 'typeorm';
 import {
   AdminChangeOtherAdminTypeDto,
   AdminchangeOtherAdminAccessLevelDto,
 } from 'src/admin/dto/otherDto';
+import { PasscodeEntity } from 'src/Entity/passcodes.entity';
+import { Mailer } from 'src/common/mailer/mailer.service';
 
 @Injectable()
 export class AdminsMgtService {
@@ -27,14 +32,17 @@ export class AdminsMgtService {
     @InjectRepository(AdminEntity) private readonly adminripo: AdminRepository,
     @InjectRepository(Notifications)
     private readonly notificationripo: NotificationRepository,
+    @InjectRepository(PasscodeEntity)
+    private readonly passcodeRipo: PassCodeRepository,
     private generatorservice: GeneatorService,
+    private mailer:Mailer
   ) {}
 
   //admin register rider
   async RegisterOtherAdmin(
     dto: RegisterOtherAdminDto,
-    admin:AdminEntity
-  ): Promise<{ message: string; response: IAdmin,loginCredential:string }> {
+    admin: AdminEntity,
+  ): Promise<{ message: string; response: IAdmin; loginCredential: string }> {
     try {
       //find if rider already exists
       const findadmin = await this.adminripo.findOne({
@@ -51,18 +59,17 @@ export class AdminsMgtService {
 
       //register new admin
       const otherAdmin = new AdminEntity();
-      (otherAdmin.fullname = dto.fullname), 
-      (otherAdmin.email = dto.email);
+      (otherAdmin.fullname = dto.fullname), (otherAdmin.email = dto.email);
       otherAdmin.password = hashedpassword;
       otherAdmin.admintype = dto.adminType;
       otherAdmin.mobile = dto.mobile;
       otherAdmin.role = Role.ADMIN;
-      otherAdmin.Nationality = dto.Nationality
+      otherAdmin.Nationality = dto.Nationality;
       otherAdmin.adminaccessLevel = dto.accesslevel;
-      otherAdmin.RegisteredAt = new Date()
-      otherAdmin.isActivated = true
-      otherAdmin.isRegistered = true
-      otherAdmin.isVerified = true
+      otherAdmin.RegisteredAt = new Date();
+      otherAdmin.isActivated = true;
+      otherAdmin.isRegistered = true;
+      otherAdmin.isVerified = true;
 
       await this.adminripo.save(otherAdmin);
 
@@ -76,7 +83,7 @@ export class AdminsMgtService {
       return {
         message: 'the admin have been Registered Successfuly',
         response: otherAdmin,
-        loginCredential:`email: ${otherAdmin.email} \n password: ${dto.password}`
+        loginCredential: `email: ${otherAdmin.email} \n password: ${dto.password}`,
       };
     } catch (error) {
       if (error instanceof NotAcceptableException)
@@ -84,14 +91,15 @@ export class AdminsMgtService {
       else {
         console.log(error);
         throw new InternalServerErrorException(
-          'something went wrong while trying to register other admin, please try again later',error.message
+          'something went wrong while trying to register other admin, please try again later',
+          error.message,
         );
       }
     }
   }
 
   //admin delete rider
-  async AdminDeleteOtherAdmin(adminID: number, admin:AdminEntity) {
+  async AdminDeleteOtherAdmin(adminID: number, admin: AdminEntity) {
     try {
       const findotheradmin = await this.adminripo.findOne({
         where: { id: adminID, admintype: AdminType.OTHER_ADMIN },
@@ -120,7 +128,8 @@ export class AdminsMgtService {
       else {
         console.log(error);
         throw new InternalServerErrorException(
-          'something went wrong while trying to delete this Admin, please try again later',error.message
+          'something went wrong while trying to delete this Admin, please try again later',
+          error.message,
         );
       }
     }
@@ -149,12 +158,12 @@ export class AdminsMgtService {
       else {
         console.log(error);
         throw new InternalServerErrorException(
-          'something went wrong while trying to fetch all admins, please try again later',error.message
+          'something went wrong while trying to fetch all admins, please try again later',
+          error.message,
         );
       }
     }
   }
-
 
   //admin get one staff by id
   async GetOneAdminByID(adminID: number) {
@@ -173,7 +182,8 @@ export class AdminsMgtService {
       else {
         console.log(error);
         throw new InternalServerErrorException(
-          'something went wrong while tryig to get one admin by ID, please try again later',error.message,
+          'something went wrong while tryig to get one admin by ID, please try again later',
+          error.message,
         );
       }
     }
@@ -184,10 +194,8 @@ export class AdminsMgtService {
     try {
       const admin = await this.adminripo.findAndCount({
         where: [
-         
           { fullname: ILike(`%${keyword}%`) },
           { Nationality: ILike(`%${keyword}%`) },
-          
         ],
         cache: false,
         comment:
@@ -206,12 +214,12 @@ export class AdminsMgtService {
       else {
         console.log(error);
         throw new InternalServerErrorException(
-          'something went wrong while tryig to search for an admin, please try again later',error.message,
+          'something went wrong while tryig to search for an admin, please try again later',
+          error.message,
         );
       }
     }
   }
-
 
   //admin change astaff access level
   async ChangeOtherAdminAccessLevel(
@@ -248,12 +256,12 @@ export class AdminsMgtService {
       else {
         console.log(error);
         throw new InternalServerErrorException(
-          'something went wrong while trying to change the accesslevel of this staff, please try again later',error.message
+          'something went wrong while trying to change the accesslevel of this staff, please try again later',
+          error.message,
         );
       }
     }
   }
-
 
   async ChangeAdminType(
     adminID: number,
@@ -289,19 +297,84 @@ export class AdminsMgtService {
       else {
         console.log(error);
         throw new InternalServerErrorException(
-          'something went wrong while trying to change the adminType of this staff, please try again later',error.message
+          'something went wrong while trying to change the adminType of this staff, please try again later',
+          error.message,
         );
       }
     }
   }
 
-
-  async AdminCount():Promise<number>{
-    const staff = await this.adminripo.count({where:{admintype:AdminType.OTHER_ADMIN}})
-    return staff
+  async AdminCount(): Promise<number> {
+    const staff = await this.adminripo.count({
+      where: { admintype: AdminType.OTHER_ADMIN },
+    });
+    return staff;
   }
 
+  async GeneratePasscode() {
+    try {
+      const code = await this.generatorservice.generatePassCode();
+      //const hashcode = await this.generatorservice.hashpassword(code);
+
+      const newcode = new PasscodeEntity();
+      newcode.passcode = code;
+      newcode.updatedAT = new Date();
+      await this.passcodeRipo.save(newcode);
+
+      return { message: 'new pass code generated', code };
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException(
+        'something went wrong when creating the passcode',
+        error.message,
+      );
+    }
+  }
+
+  async UpdatePasscode(admin: AdminEntity, id: number) {
+    try {
+      const findadmin = await this.adminripo.findOne({
+        where: {
+          id: admin.id,
+          adminaccessLevel: AdminAccessLevels.LEVEL3,
+          admintype: AdminType.SUPERADMIN,
+        },
+      });
+      if (!findadmin)
+        throw new NotFoundException('this super admin is not found');
+
+      const findpasscode = await this.passcodeRipo.findOne({
+        where: { id: id },
+      });
+      if (!findpasscode)
+        throw new NotFoundException(
+          `passcode associated to id ${id} is not found`,
+        );
+
+      const code = await this.generatorservice.generatePassCode();
+      //const hashcode = await this.generatorservice.hashpassword(code);
+
+      findpasscode.passcode = code;
+      findpasscode.updatedAT = new Date();
+      await this.passcodeRipo.save(findpasscode);
+
+      //forward passcode to mail
+      await this.mailer.updatePasscodeMail(admin.email,admin.fullname,code)
+
+
+      return { message: 'pass code updated by the superadmin, please check your email for the new passcode' };
+    } catch (error) {
+      if (error instanceof NotFoundException)
+        throw new NotFoundException(error.message);
+      else {
+        console.log(error);
+        throw new InternalServerErrorException(
+          'something went wrong while updating passcode, please try again later',
+          error.message,
+        );
+      }
+    }
+  }
 
   //deactivate admin's account
-
 }

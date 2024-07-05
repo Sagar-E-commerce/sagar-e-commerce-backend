@@ -172,6 +172,12 @@ export class updateOrderStatusDto{
     status:OrderStatus
 }
 
+export class PasscodeDto{
+    @IsString()
+    @IsNotEmpty()
+    passcode:string
+}
+
 export class uploadVideoDto{
     @IsString()
     @IsOptional()

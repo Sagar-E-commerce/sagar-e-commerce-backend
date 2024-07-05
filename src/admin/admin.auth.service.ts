@@ -10,7 +10,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { AdminEntity } from 'src/Entity/admin.entity';
-import { AdminRepository } from './admin.repository';
+import { AdminRepository, PassCodeRepository } from './admin.repository';
 import { GeneatorService } from 'src/common/services/generator.service';
 import { IAdmin } from './admin';
 import { AdminAccessLevels, AdminType } from 'src/Enums/all-enums';
@@ -30,6 +30,8 @@ import {
   addPasswordDto,
 } from 'src/common/common.dto';
 import { LessThan } from 'typeorm';
+import { PasscodeEntity } from 'src/Entity/passcodes.entity';
+import { PasscodeDto } from './dto/otherDto';
 
 @Injectable()
 export class AdminAuthService {
@@ -38,9 +40,38 @@ export class AdminAuthService {
     @InjectRepository(UserOtp) private readonly otprepo: OtpRepository,
     @InjectRepository(Notifications)
     private readonly notificationrepo: NotificationRepository,
+    @InjectRepository(PasscodeEntity)
+    private readonly passcodeRipo: PassCodeRepository,
     private generatorservice: GeneatorService,
     private mailerservice: Mailer,
   ) {}
+
+  //verify the passcode
+  async VerifyPasscodeBeforeSignup(dto: PasscodeDto) {
+    try {
+      const passcode = await this.passcodeRipo.findOne({
+        where: { passcode: dto.passcode },
+      });
+      if (!passcode)
+        throw new NotFoundException(
+          'passcode incorrect, please provide a valid passcode. Thank you',
+        );
+
+      return {
+        message: 'passcode correct, please proceed to sign up as a superAdmin',
+      };
+    } catch (error) {
+      if (error instanceof NotFoundException)
+        throw new NotFoundException(error.message);
+      else {
+        console.log(error);
+        throw new InternalServerErrorException(
+          'something went wrong, please try again later',
+          error.message,
+        );
+      }
+    }
+  }
 
   // get admin profile
   async getProfile(Admin: AdminEntity): Promise<IAdmin> {
@@ -56,7 +87,8 @@ export class AdminAuthService {
       else {
         console.log(error);
         throw new InternalServerErrorException(
-          'something went wrong while fetching admin profile, please try again later',error.message
+          'something went wrong while fetching admin profile, please try again later',
+          error.message,
         );
       }
     }
@@ -64,20 +96,16 @@ export class AdminAuthService {
 
   //sign up admin
 
-  async RegisterAdmin(
-    dto: RegisterAdminDto,
-  ): Promise<{ message: string }> {
+  async RegisterAdmin(dto: RegisterAdminDto): Promise<{ message: string }> {
     try {
       const checkemail = await this.adminRepo.findOne({
         where: { email: dto.email },
       });
       if (checkemail) throw new ConflictException('This admin already exists');
 
-
-
       const hashedpassword = await this.generatorservice.hashpassword(
         dto.password,
-      )
+      );
 
       const admin = new AdminEntity();
       admin.adminID = `#BASA-${await this.generatorservice.generateUserID()}`;
@@ -85,9 +113,9 @@ export class AdminAuthService {
       admin.mobile = dto.mobile;
       admin.fullname = dto.fullname;
       admin.password = hashedpassword;
-      admin.adminaccessLevel = AdminAccessLevels.LEVEL3
-      admin.admintype = AdminType.SUPERADMIN
-      admin.Nationality = dto.Nationality
+      admin.adminaccessLevel = AdminAccessLevels.LEVEL3;
+      admin.admintype = AdminType.SUPERADMIN;
+      admin.Nationality = dto.Nationality;
       admin.RegisteredAt = new Date();
       admin.isRegistered = true;
 
@@ -134,7 +162,8 @@ export class AdminAuthService {
       else {
         console.log(error);
         throw new InternalServerErrorException(
-          'something happen while trying to sign up as an admin',error.message
+          'something happen while trying to sign up as an admin',
+          error.message,
         );
       }
     }
@@ -143,7 +172,7 @@ export class AdminAuthService {
   //verify email address 2fa
   async verifyEmail(
     dto: VerifyOtpDto,
-  ): Promise<{ isValid: boolean; accessToken: any, admin:IAdmin }> {
+  ): Promise<{ isValid: boolean; accessToken: any; admin: IAdmin }> {
     try {
       //find the otp provided if it matches with the otp stored
       const findotp = await this.otprepo.findOne({ where: { otp: dto.otp } });
@@ -187,7 +216,7 @@ export class AdminAuthService {
         admin.role,
       );
 
-      return { isValid: true, accessToken, admin:admin };
+      return { isValid: true, accessToken, admin: admin };
     } catch (error) {
       if (error instanceof NotFoundException)
         throw new NotFoundException(error.message);
@@ -196,14 +225,15 @@ export class AdminAuthService {
       else {
         console.log(error);
         throw new InternalServerErrorException(
-          'an error occured while verifying the email of the admin pls try again',error.message
+          'an error occured while verifying the email of the admin pls try again',
+          error.message,
         );
       }
     }
   }
 
   // resend email verification otp
-  async ResendExpiredOtp(email: string|any): Promise<{ message: string }> {
+  async ResendExpiredOtp(email: string | any): Promise<{ message: string }> {
     try {
       const emailexsist = await this.adminRepo.findOne({
         where: { email: email },
@@ -263,7 +293,8 @@ export class AdminAuthService {
       else {
         console.log(error);
         throw new InternalServerErrorException(
-          'somethig went wrong when trying to resend otp, please try again',error.message
+          'somethig went wrong when trying to resend otp, please try again',
+          error.message,
         );
       }
     }
@@ -311,7 +342,8 @@ export class AdminAuthService {
       else {
         console.log(error);
         throw new InternalServerErrorException(
-          'somethig went wrong when trying to request for password reset link, please try again',error.message
+          'somethig went wrong when trying to request for password reset link, please try again',
+          error.message,
         );
       }
     }
@@ -352,7 +384,8 @@ export class AdminAuthService {
       else {
         console.log(error);
         throw new InternalServerErrorException(
-          'somethig went wrong when trying to verify reset link sent , please try again',error.message
+          'somethig went wrong when trying to verify reset link sent , please try again',
+          error.message,
         );
       }
     }
@@ -388,7 +421,8 @@ export class AdminAuthService {
       else {
         console.log(error);
         throw new InternalServerErrorException(
-          'somethig went wrong when trying to reset password , please try again',error.message
+          'somethig went wrong when trying to reset password , please try again',
+          error.message,
         );
       }
     }
@@ -431,7 +465,7 @@ export class AdminAuthService {
         findadmin.role,
       );
 
-      return {accesstoken:token, admin:findadmin}
+      return { accesstoken: token, admin: findadmin };
     } catch (error) {
       if (error instanceof NotFoundException)
         throw new NotFoundException(error.message);
@@ -440,7 +474,8 @@ export class AdminAuthService {
       else {
         console.log(error);
         throw new InternalServerErrorException(
-          'somethig went wrong when trying to login , please try again',error.message
+          'somethig went wrong when trying to login , please try again',
+          error.message,
         );
       }
     }

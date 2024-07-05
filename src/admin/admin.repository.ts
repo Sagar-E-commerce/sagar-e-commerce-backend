@@ -1,5 +1,6 @@
 import { AdminEntity } from "src/Entity/admin.entity";
 import { ShippingFlatRateEntity } from "src/Entity/discountCoupon.entity";
+import { PasscodeEntity } from "src/Entity/passcodes.entity";
 import { CategoryEntity } from "src/Entity/productCategory.entity";
 import { VideoEntity } from "src/Entity/videos.entity";
 import { EntityRepository, Repository } from "typeorm";
@@ -16,3 +17,6 @@ export class CategoryRepository extends Repository<CategoryEntity>{}
 
 @EntityRepository(ShippingFlatRateEntity)
 export class ShippingFlatRateRepository extends Repository<ShippingFlatRateEntity>{}
+
+@EntityRepository(PasscodeEntity)
+export class PassCodeRepository extends Repository<PasscodeEntity>{}

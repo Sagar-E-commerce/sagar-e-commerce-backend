@@ -41,6 +41,7 @@ import { PayUmoneyPaymentGatewayService } from './dashboard/payment-config/payum
 import { UpdatePaymentGatewayConfigService } from './dashboard/payment-config/update-payment.service';
 import { PaymentGateWayController } from './dashboard/payment-config/payment-config.controller';
 import { ShiprocketService } from 'src/common/services/shiprocket.service';
+import { PasscodeEntity } from 'src/Entity/passcodes.entity';
 
 @Module({
   imports: [
@@ -63,6 +64,7 @@ import { ShiprocketService } from 'src/common/services/shiprocket.service';
       RazorPayEntity,
       CashFreeEntity,
       PayUmoneyEntity,
+      PasscodeEntity
       
     ]),
   ],

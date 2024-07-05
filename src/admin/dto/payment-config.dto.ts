@@ -7,6 +7,10 @@ export class UpdatePaymentGatewayDto {
   @IsEnum(PaymentGateways)
   selectedGateway: PaymentGateways;
 
+  @IsString()
+  @IsNotEmpty()
+  passcode:string
+
 }
 
 //ooption for one kind of p

@@ -7,11 +7,14 @@ import { CashfreeConfigDto, PayUMoneyConfigDto, RazorpayConfigDto, UpdateCashfre
 import { Request, Response } from 'express';
 import { JwtGuard } from "src/auth/guard/jwt.guard";
 import { RoleGuard } from "src/auth/guard/role.guard";
-import { Role } from "src/Enums/all-enums";
+import { AdminAccessLevels, AdminType, Role } from "src/Enums/all-enums";
 import { Roles } from "src/auth/decorator/role.decorator";
+import { AdminAcessLevelGuard } from "src/auth/guard/accesslevel.guard";
+import { AdminAccessLevel } from "src/auth/decorator/accesslevel.decorator";
+import { AdminTypeGuard } from "src/auth/guard/admintype.guard";
+import { AdminTypes } from "src/auth/decorator/admintype.decorator";
 
-// @UseGuards(JwtGuard,RoleGuard)
-// @Roles(Role.ADMIN)
+
 @Controller('payment-gateway-config')
 export class PaymentGateWayController{
     constructor(private readonly razorpaymentservice:RazorPayPaymentGatewayService,
@@ -25,11 +28,19 @@ export class PaymentGateWayController{
         return await this.updatepaymentgtewayservice.getConfig()
     }
 
+    @UseGuards(JwtGuard,RoleGuard,AdminAcessLevelGuard,AdminTypeGuard)
+    @Roles(Role.ADMIN)
+    @AdminAccessLevel(AdminAccessLevels.LEVEL3)
+    @AdminTypes(AdminType.SUPERADMIN)
     @Post("/first-click-to-set-gateway")
     async createGateway(@Body() dto: UpdatePaymentGatewayDto,) {
       return await this.updatepaymentgtewayservice.firstclicktoSelectPaymentGateway(dto);
     }
 
+    @UseGuards(JwtGuard,RoleGuard,AdminAcessLevelGuard,AdminTypeGuard)
+    @Roles(Role.ADMIN)
+    @AdminAccessLevel(AdminAccessLevels.LEVEL3)
+    @AdminTypes(AdminType.SUPERADMIN)
     @Patch('/select-gateway/:id')
     async UpdatePaymentGatewaySelectionFromAdmin(@Body()dto:UpdatePaymentGatewayDto, @Param('id')id:number){
         return await this.updatepaymentgtewayservice.updateSelectedGateway(dto,id)

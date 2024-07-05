@@ -101,6 +101,11 @@ export class GeneatorService{
     return dropoffcode();
   }
 
+  public generatePassCode(): string {
+    const dropoffcode = nanoid.customAlphabet('1234567890', 8);
+    return dropoffcode();
+  }
+
    //generaete drop off code
    public generatereceiptID(): string {
     const dropoffcode = nanoid.customAlphabet('1234567890abcdefghijklmnopqrstuvwxyz', 7);

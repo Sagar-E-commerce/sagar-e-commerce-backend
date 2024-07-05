@@ -4,7 +4,9 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { PasscodeEntity } from 'src/Entity/passcodes.entity';
 import { PaymentConfigurationEntity } from 'src/Entity/paymentConfig.entity';
+import { PassCodeRepository } from 'src/admin/admin.repository';
 import { UpdatePaymentGatewayDto } from 'src/admin/dto/payment-config.dto';
 import { Repository } from 'typeorm';
 
@@ -13,6 +15,8 @@ export class UpdatePaymentGatewayConfigService {
   constructor(
     @InjectRepository(PaymentConfigurationEntity)
     private readonly paymentGatewayConfigRepo: Repository<PaymentConfigurationEntity>,
+    @InjectRepository(PasscodeEntity)
+    private readonly passcodeRipo: PassCodeRepository,
   ) {}
 
   async getConfig(): Promise<PaymentConfigurationEntity[]> {
@@ -31,7 +35,6 @@ export class UpdatePaymentGatewayConfigService {
           error.message,
         );
       }
-      
     }
   }
 
@@ -39,17 +42,27 @@ export class UpdatePaymentGatewayConfigService {
     dto: UpdatePaymentGatewayDto,
   ): Promise<PaymentConfigurationEntity> {
     try {
+      const passcode = await this.passcodeRipo.findOne({
+        where: { passcode: dto.passcode },
+      });
+      if (!passcode) throw new NotFoundException('passcode incorrect');
+
       const gateway = new PaymentConfigurationEntity();
       gateway.selectedGateway = dto.selectedGateway;
       gateway.updatedAt = new Date();
       await this.paymentGatewayConfigRepo.save(gateway);
+
       return gateway;
     } catch (error) {
-      console.log(error);
-      throw new InternalServerErrorException(
-        'something went wrong while coniguring the payment gateway',
-        error.message,
-      );
+      if (error instanceof NotFoundException)
+        throw new NotFoundException(error.message);
+      else {
+        console.log(error);
+        throw new InternalServerErrorException(
+          'something went wrong while selecting the payment gateway',
+          error.message,
+        );
+      }
     }
   }
 
@@ -59,6 +72,13 @@ export class UpdatePaymentGatewayConfigService {
     id: number,
   ): Promise<PaymentConfigurationEntity> {
     try {
+
+      const passcode = await this.passcodeRipo.findOne({
+        where: { passcode: dto.passcode },
+      });
+      if (!passcode) throw new NotFoundException('passcode incorrect');
+
+
       let config = await this.paymentGatewayConfigRepo.findOne({
         where: { id: id },
       });

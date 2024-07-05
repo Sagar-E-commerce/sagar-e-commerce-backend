@@ -10,6 +10,7 @@ import { RegisterAdminDto } from './dto/authDto';
 import { AdminAuthService } from './admin.auth.service';
 import { Request } from 'express';
 import { JwtGuard } from 'src/auth/guard/jwt.guard';
+import { PasscodeDto } from './dto/otherDto';
 
 @Controller('admin-auth')
 export class AdminAuthController {
@@ -19,6 +20,13 @@ export class AdminAuthController {
   @Get('profile')
   async getProfile(@Req() req) {
     return this.adminauthservice.getProfile(req.user);
+  }
+
+  @Post('/verify-passcode')
+  async VerifyPasscode(
+    @Body() dto: PasscodeDto,
+  ){
+    return await this.adminauthservice.VerifyPasscodeBeforeSignup(dto);
   }
 
   @Post('/register')
