@@ -106,7 +106,7 @@ export class PaymentGateWayController{
 
     //webhooks 
 
-    @Post('/webhook/razorpay')
+    @Post('/webhook/razorpay-webhook')
     async handleRaorPayWebhook(@Res() res: Response, @Req() req: Request) {
       return await this.razorpaymentservice.handleRazorpayWebhook(req, res);
     }

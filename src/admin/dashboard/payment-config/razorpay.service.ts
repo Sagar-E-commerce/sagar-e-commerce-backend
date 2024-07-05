@@ -151,11 +151,8 @@ export class RazorPayPaymentGatewayService {
 
   //for the customer after their payment
   async handleRazorpayWebhook(req: any, res: any): Promise<void> {
-    const [config] = await this.razorpayripo.find({
-      order: { updatedAt: 'DESC' },
-      take: 1,
-    });
-    const secret = config.razorpayWebhookSecret;
+   
+    const secret = "thegearmates";
 
     const shasum = crypto.createHmac('sha256', secret);
     shasum.update(JSON.stringify(req.body));
@@ -170,7 +167,7 @@ export class RazorPayPaymentGatewayService {
     const event = req.body;
     if (event.event === 'payment.captured') {
       const order = await this.orderRepo.findOne({
-        where: { id: event.payload.payment.entity.order_id },
+        where: { orderID: event.payload.payment.entity.order_id },
         relations: ['user', 'items'],
       });
       if (order) {
