@@ -58,7 +58,7 @@ export class AdminAuthService {
         );
 
       return {
-        message: 'passcode correct, please proceed to sign up as a superAdmin',
+        message: 'passcode correct, please proceed to sign up as a superAdmin',passcode
       };
     } catch (error) {
       if (error instanceof NotFoundException)
