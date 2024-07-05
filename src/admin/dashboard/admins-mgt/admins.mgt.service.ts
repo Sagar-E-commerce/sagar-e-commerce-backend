@@ -190,24 +190,34 @@ export class AdminsMgtService {
   }
 
   //admin search for an admin
-  async SearchForOtherAdmin(keyword: any | string) {
+  async SearchForOtherAdmin(keyword: string, page?:number, perPage?:number, sort?:string): Promise<{ data: AdminEntity[]; total: number }> {
     try {
-      const admin = await this.adminripo.findAndCount({
-        where: [
-          { fullname: ILike(`%${keyword}%`) },
-          { Nationality: ILike(`%${keyword}%`) },
-        ],
-        cache: false,
-        comment:
-          'searching for an admin with either of the keywords , fullname or nationality or email',
-      });
+      const qb = this.adminripo.createQueryBuilder('admin')
 
-      if (admin[1] === 0)
+      qb.where('admin.fullname ILIKE :keyword',{keyword:`%${keyword}%`})
+      qb.cache(false)
+
+
+      if (sort) {
+        const [sortField] = sort.split(',');
+        qb.orderBy(`admin.${sortField}`, 'DESC');
+      }
+
+      if (page && perPage) {
+        qb.skip((page - 1) * perPage).take(perPage);
+      }
+
+      const [admin, total] = await qb.getManyAndCount();
+
+      if (!admin.length) {
         throw new NotFoundException(
-          `no search result found for ${keyword} on the admin database `,
+          `No category found matching your search criteria for "${keyword}".`,
         );
+      }
+  
+      return { data: admin, total };
 
-      return { message: 'Admin found', searchedRider: admin };
+      
     } catch (error) {
       if (error instanceof NotFoundException)
         throw new NotFoundException(error.message);
