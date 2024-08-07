@@ -28,6 +28,10 @@ export class RegisterUserDto{
 
     @IsString()
     @IsNotEmpty()
+    dropoffcode:string
+
+    @IsString()
+    @IsNotEmpty()
     @Match('password', { message: 'ConfirmPassword does not match the password.' })
     confirmPassword:string 
 

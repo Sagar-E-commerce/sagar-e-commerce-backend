@@ -81,9 +81,11 @@ export class UserAuthService {
       );
 
       const user = new UserEntity();
-      user.userID = `#BASU-${await this.generatorservice.generateUserID()}`;
+      user.userID = `#TgmU-${await this.generatorservice.generateUserID()}`;
       user.email = dto.email;
       user.fullname = dto.fullname;
+      user.dropOffpincode = dto.dropoffcode
+      user.pickuppincode = process.env.PICKUPCODE
       user.mobile = dto.mobile;
       user.password = hashedpassword;
       user.RegisteredAt = new Date();

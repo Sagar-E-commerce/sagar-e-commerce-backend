@@ -10,6 +10,7 @@ import { CloudinaryService } from './services/claudinary.service';
 import { ShiprocketService } from './services/shiprocket.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { OrderEntity } from 'src/Entity/order.entity';
+import { CommonController } from './common.controller';
 
 @Module({
   imports: [TypeOrmModule.forFeature([OrderEntity])],
@@ -23,6 +24,7 @@ import { OrderEntity } from 'src/Entity/order.entity';
     CloudinaryService,
     ShiprocketService
   ],
+  controllers:[CommonController],
   exports: [CloudinaryService,CloudinaryConfig],
 })
 export class CommonModule {}

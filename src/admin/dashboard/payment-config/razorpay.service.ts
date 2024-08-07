@@ -25,6 +25,7 @@ import {
 import Razorpay from 'razorpay';
 import { Mailer } from 'src/common/mailer/mailer.service';
 import { GeneatorService } from 'src/common/services/generator.service';
+import { ShiprocketService } from 'src/common/services/shiprocket.service';
 
 export class RazorPayPaymentGatewayService {
 
@@ -184,6 +185,7 @@ export class RazorPayPaymentGatewayService {
 
        const receiptid = await this.generatorservice.generatereceiptID()
        const total = typeof order.total === 'number' ? order.total : parseFloat(order.total);
+       
        await this.mailer.sendOrderConfirmationWithReceipt(
          order.user.email,
          order.user.fullname,
@@ -192,8 +194,6 @@ export class RazorPayPaymentGatewayService {
          items,
          total,
        );
-       //reccomend dispatch route
-       //await this.shiprocketservice.recommendDispatchService(order);
       }
     }
 

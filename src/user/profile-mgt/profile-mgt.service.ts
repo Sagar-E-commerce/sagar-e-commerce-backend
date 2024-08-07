@@ -36,7 +36,6 @@ export class ProfileMgtServices {
     user: UserEntity,
   ): Promise<IUser> {
     try {
-      user.Nationality = dto.Nationality;
       user.cityOfResidence = dto.cityOfResidence;
       user.fullname = dto.fullname;
       user.home_address = dto.home_address;
@@ -99,7 +98,7 @@ export class ProfileMgtServices {
       notification.message = `the user with id ${user.id} have succesfully changed password `;
       await this.notficationrepo.save(notification);
 
-      return { message: 'passwod chanaged successfully' };
+      return { message: 'passwod changed successfully' };
     } catch (error) {
       if (error instanceof NotAcceptableException) {
         throw new NotAcceptableException(error.message);

@@ -30,6 +30,11 @@ export enum OrderType {
   PICK_UP = 'pick_up',
 }
 
+export enum ORDERTYPE{
+  COD ='cod',
+  PREPAID = "prepaid"
+}
+
 export enum paymentType {
   DIRECT_TRANSFER = 'direct_transfer',
   CARD = 'card',

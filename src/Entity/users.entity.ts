@@ -61,6 +61,13 @@ export class UserEntity implements IUser{
     @Column({nullable:true})
     Nationality: string;
 
+    @Column({nullable:true})
+    pickuppincode:string
+
+    @Column({nullable:true})
+    dropOffpincode:string
+
+
     @Column({ type: 'decimal', precision: 10, scale: 2, default: 0 })
     totalRevenue: number;
 

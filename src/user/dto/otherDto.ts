@@ -1,5 +1,5 @@
 import { IsEmail, IsEnum, IsInt, IsNotEmpty, IsNumber, IsOptional, IsString, Min } from "class-validator";
-import { CategoryProductAvailabilitySatisfaction, LikelihoodOfWebsiteReccomendation, OrderType, ProductAndImageDiscription, ProductBrowsingExperience, ShoppingExperience, paymentType } from "src/Enums/all-enums";
+import { CategoryProductAvailabilitySatisfaction, LikelihoodOfWebsiteReccomendation, ORDERTYPE, OrderType, ProductAndImageDiscription, ProductBrowsingExperience, ShoppingExperience, paymentType } from "src/Enums/all-enums";
 
 export class EditUserProfileDto{
     @IsString()
@@ -57,10 +57,15 @@ export class AddToCartDto {
     quantity: number;
   }
 
+  export class CourierDto{
+    @IsNumber()
+    courierID:number
+  }
+
   export class confirmOrderDto{
-    @IsNotEmpty()
-    @IsEnum(OrderType)
-    orderType:OrderType
+    @IsOptional()
+    @IsEnum(ORDERTYPE)
+    orderType:ORDERTYPE
 
     @IsOptional()
     @IsString()
@@ -68,30 +73,39 @@ export class AddToCartDto {
 
 
     @IsString()
-    @IsNotEmpty()
+    @IsOptional()
     name:string
 
     @IsString()
-    @IsNotEmpty()
+    @IsOptional()
     mobile:string
 
     @IsString()
-    @IsNotEmpty()
+    @IsOptional()
     billing_address:string
 
+    @IsString()
+    @IsOptional()
+    billing_address_2:string
+
     @IsEmail()
-    @IsNotEmpty()
+    @IsOptional()
     email:string
 
 
     @IsString()
     @IsOptional()
-    dropOffpincode:string
+    billing_city:string
 
     @IsString()
     @IsOptional()
-    pickUppincode:string
+    billing_state:string
 
+    @IsString()
+    @IsOptional()
+    billing_pincode:string
+
+   
 
   }
 

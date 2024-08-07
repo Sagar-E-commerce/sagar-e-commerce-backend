@@ -25,6 +25,13 @@ export class  VerifyOtpForResetPasswordDto{
 
 }
 
+export class ReccommendDispatchDto{
+    pickuppincode:string
+    dropoffpincode:string
+    weight:number 
+    
+}
+
 
 export class addPasswordDto{
 

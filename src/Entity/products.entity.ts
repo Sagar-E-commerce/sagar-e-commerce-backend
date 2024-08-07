@@ -24,6 +24,8 @@ export interface IProduct{
     wholesalePrice: number;
     minWholesaleQuantity: number;
     weight:number
+    sku:string
+    hsn:string
     hasTax:boolean
     taxRate:number
     available_sizes:string
@@ -68,6 +70,14 @@ export class ProductEntity implements IProduct{
 
     @Column({nullable:true})
     description: string
+
+
+    @Column({nullable:true})
+    hsn: string
+
+
+    @Column({nullable:true})
+    sku: string
 
     @Column({nullable:true})
     stock: number

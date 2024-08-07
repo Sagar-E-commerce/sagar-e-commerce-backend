@@ -3,7 +3,10 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { PayUmoneyEntity, PaymentConfigurationEntity } from 'src/Entity/paymentConfig.entity';
+import {
+  PayUmoneyEntity,
+  PaymentConfigurationEntity,
+} from 'src/Entity/paymentConfig.entity';
 import {
   PayUMoneyConfigDto,
   UpdatePaymentGatewayDto,
@@ -11,6 +14,7 @@ import {
 import { Repository } from 'typeorm';
 import axios from 'axios';
 import * as crypto from 'crypto';
+import * as qs from 'qs';
 import { OrderEntity } from 'src/Entity/order.entity';
 import { OrderRepository, PayUmoneyRepostory } from 'src/user/user.repository';
 
@@ -22,16 +26,15 @@ export class PayUmoneyPaymentGatewayService {
   ) {}
 
   async getConfig(): Promise<PayUmoneyEntity> {
-    const config = await this.payUmoneyripo.findOne({order:{updatedAt:'DESC'}});
+    const config = await this.payUmoneyripo.findOne({
+      order: { updatedAt: 'DESC' },
+    });
     if (!config)
       throw new NotFoundException('PayUmoney gateway config not found');
     return config;
   }
 
-  async payUmoneyConfig(
-    dto:  PayUMoneyConfigDto,
-  ): Promise<PayUmoneyEntity> {
-
+  async payUmoneyConfig(dto: PayUMoneyConfigDto): Promise<PayUmoneyEntity> {
     try {
       const payUmoney = new PayUmoneyEntity();
       payUmoney.payumoneyApiKey = dto.payumoneyApiKey;
@@ -52,14 +55,12 @@ export class PayUmoneyPaymentGatewayService {
         error.message,
       );
     }
-    
   }
 
-
   async updatePayumoneyConfig(
-    dto:  PayUMoneyConfigDto,payUmoneyID:number
+    dto: PayUMoneyConfigDto,
+    payUmoneyID: number,
   ): Promise<PayUmoneyEntity> {
-
     try {
       const payUmoney = await this.payUmoneyripo.findOne({
         where: { id: payUmoneyID },
@@ -89,65 +90,125 @@ export class PayUmoneyPaymentGatewayService {
         );
       }
     }
-    
   }
 
-
- // Method to create a PayUMoney payment
- async createPaymentPayUMoney(orderDetails: OrderEntity): Promise<any> {
-  // Fetch the payment gateway configuration
-  const config = await this.getConfig();
-
-  // Find the order and its associated user and items
-  const order = await this.orderRepo.findOne({
-    where: { id: orderDetails.id },
-    relations: ['user', 'items'],
-  });
-  if (!order)
-    throw new NotFoundException(
-      `The order with the ID ${orderDetails.id} does not exist`,
-    );
-
-  // Construct the payload for PayUMoney API
-  const payload = {
-    key: config.payumoneyMerchantKey,
-    txnid: `Txn_${order.id}_${Date.now()}`,
-    amount: order.total.toFixed(2),
-    productinfo: 'Order Description',
-    firstname: order.user ? order.user.fullname : `Guest_${order.name}`,
-    email: order.user ? order.user.email : order.email,
-    phone: order.user ? order.user.mobile : order.mobile,
-    surl: 'https://yourwebsite.com/success',
-    furl: 'https://yourwebsite.com/failure',
-    service_provider: 'payu_paisa',
-    hash: '', // This will be calculated later
-  };
-
-  // Create the hash using SHA-512 algorithm
-  const hashString = `${payload.key}|${payload.txnid}|${payload.amount}|${payload.productinfo}|${payload.firstname}|${payload.email}|||||||||||${config.payumoneyMerchantSalt}`;
-  payload.hash = crypto.createHash('sha512').update(hashString).digest('hex');
-
-  try {
-    // Send the payment creation request to PayUMoney
-    const response = await axios.post(config.payumoneyPaymentUrl, payload, {
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${config.payumoneyAuthToken}`,
-      },
+  // Method to create a PayUMoney payment
+  async createPaymentPayUMoney1(orderDetails: OrderEntity): Promise<any> {
+    // Find the order and its associated user and items
+    const order = await this.orderRepo.findOne({
+      where: { id: orderDetails.id },
+      relations: ['user', 'items'],
     });
+    if (!order)
+      throw new NotFoundException(
+        `The order with the ID ${orderDetails.id} does not exist`,
+      );
 
-    // Return the response data
-    return response.data;
-  } catch (error) {
-    console.log(error);
-    throw new InternalServerErrorException(
-      'Failed to create PayUMoney payment',
-      error.message,
-    );
+       // Ensure order.total is a number
+    const amount = Number(order.total);
+    if (isNaN(amount)) {
+      throw new InternalServerErrorException('Order total is not a valid number');
+    }
+
+    // Construct the payload for PayUMoney API
+    const payload = {
+      key: process.env.payumoneymachantKey,
+      txnid: `Txn_${order.orderID}_${Date.now()}`,
+      amount: amount.toFixed(2),
+      productinfo: 'Order Description',
+      firstname: order.user.fullname,
+      email: order.user.email,
+      phone: order.user.mobile,
+      surl: 'https://yourwebsite.com/success',
+      furl: 'https://yourwebsite.com/failure',
+      service_provider: 'payu_paisa',
+      hash: '', // This will be calculated later
+    };
+
+    // Create the hash using SHA-512 algorithm
+    const hashString = `${payload.key}|${payload.txnid}|${payload.amount}|${payload.productinfo}|${payload.firstname}|${payload.email}|||||||||||${process.env.payumoneymachantSalt}`;
+    payload.hash = crypto.createHash('sha512').update(hashString).digest('hex');
+    console.log(hashString, payload.hash)
+
+    try {
+      // Send the payment creation request to PayUMoney
+      const response = await axios.post('https://test.payu.in/_payment', payload, {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          Authorization: `Bearer ${process.env.payumoneyClientID}`,
+        },
+      });
+
+      // Return the response data
+      return response.data;
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException(
+        'Failed to create PayUMoney payment',
+        error.message,
+      );
+    }
   }
-}
 
+  async createPaymentPayUMoney(orderDetails: OrderEntity): Promise<any> {
+    // Find the order and its associated user and items
+    const order = await this.orderRepo.findOne({
+      where: { id: orderDetails.id },
+      relations: ['user', 'items'],
+    });
+    if (!order) {
+      throw new NotFoundException(`The order with the ID ${orderDetails.id} does not exist`);
+    }
 
+    // Ensure order.total is a number
+    const amount = Number(order.total);
+    if (isNaN(amount)) {
+      throw new InternalServerErrorException('Order total is not a valid number');
+    }
+
+    // Set the PayUMoney API endpoint and necessary credentials
+    const apiEndpoint = 'https://test.payu.in/_payment';
+    const merchantKey = process.env.payumoneymachantKey;
+    const salt = process.env.payumoneymachantSalt;
+
+    // Prepare the order details
+    const txnId = `TXN${Date.now()}`;
+    const payload = {
+      key: merchantKey,
+      txnid: txnId,
+      amount: amount.toFixed(2),
+      productinfo: 'Order Description',
+      firstname: order.user.fullname,
+      email: order.user.email,
+      phone: order.user.mobile,
+      surl: 'https://yourwebsite.com/payment-success',
+      furl: 'https://yourwebsite.com/payment-failure',
+      hash:''
+    };
+
+    // Generate the hash
+    const hashString = `${payload.key}|${payload.txnid}|${payload.amount}|${payload.productinfo}|${payload.firstname}|${payload.email}|||||||||||${salt}`;
+    payload.hash = crypto.createHash('sha512').update(hashString).digest('hex');
+
+    try {
+      // Send the payment creation request to PayUMoney
+      const response = await axios.post(
+        apiEndpoint,
+        qs.stringify(payload), // Send payload as form data
+        {
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+        },
+      );
+
+      // Return the response data
+      return response.data;
+    } catch (error) {
+      console.log(error.response?.data || error.message);
+      throw new InternalServerErrorException('Failed to create PayUMoney payment', error.message);
+    }
+  }
 
   async handlePayuMoneyWebhook(req: any, res: any): Promise<void> {
     const config = await this.getConfig();
@@ -165,7 +226,8 @@ export class PayUmoneyPaymentGatewayService {
     const event = req.body;
     if (event.event === 'payment.success') {
       const order = await this.orderRepo.findOne({
-        where: { id: event.data.order_id },relations:['user','items']
+        where: { id: event.data.order_id },
+        relations: ['user', 'items'],
       });
       if (order) {
         order.isPaid = true;

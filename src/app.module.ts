@@ -33,6 +33,8 @@ import { ConfigModule } from '@nestjs/config';
           user: process.env.AUTH_EMAIL,
           pass: process.env.AUTH_PASS,
         },
+        connectionTimeout: 120000, // Adjust as needed
+        socketTimeout: 120000, // Adjust as needed
       },
     }),
   ],

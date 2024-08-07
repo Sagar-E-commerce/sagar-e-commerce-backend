@@ -15,6 +15,8 @@ export interface  IUser {
     home_address:string 
     mobile:string
     gender: string
+    dropOffpincode:string,
+    pickuppincode:string
     profile_picture: string
     LGA_of_Home_Address: string
     cityOfResidence:string

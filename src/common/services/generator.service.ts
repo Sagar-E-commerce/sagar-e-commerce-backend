@@ -152,5 +152,17 @@ export class GeneatorService{
       );
     });
   }
+
+   // Generate HSN code
+   public generateHSNCode(): string {
+    const hsnCode = nanoid.customAlphabet('1234567890', 8);
+    return hsnCode();
+  }
+
+  // Generate SKU code
+  public generateSKUCode(): string {
+    const skuCode = nanoid.customAlphabet('ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890', 10);
+    return skuCode();
+  }
     
 }

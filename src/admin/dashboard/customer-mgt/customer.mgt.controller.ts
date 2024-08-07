@@ -38,8 +38,15 @@ export class CustomerMgtController{
 
     @AdminAccessLevel(AdminAccessLevels.LEVEL3,AdminAccessLevels.LEVEL2,AdminAccessLevels.LEVEL1)
     @Get('search-user')
-    async searchUsers(@Query('keyword')keyword:string | any){
-        return await this.cusomermgtservice.searchUsers(keyword)
+    async searchCategories(
+      @Query('keyword') keyword: string,
+      @Query('page') page?: number,
+      @Query('perPage') perPage?: number,
+      @Query('sort') sort?: string,
+      
+    ) {
+      return this.cusomermgtservice.searchUsers(
+        keyword,page,perPage,sort)
     }
 
     @AdminAccessLevel(AdminAccessLevels.LEVEL3,AdminAccessLevels.LEVEL2,AdminAccessLevels.LEVEL1)

@@ -216,11 +216,14 @@ export class ProductMgtService {
       // create post
       const product = new ProductEntity();
       product.name = dto.name;
-      product.productID = `#BnSPr${await this.generatorservice.generateProductID()}`;
+      product.productID = `#TgmPr${await this.generatorservice.generateProductID()}`;
+      product.hsn = await this.generatorservice.generateHSNCode()
+      product.sku = await this.generatorservice.generateSKUCode()
       product.description = dto.description;
       product.productImage = productImage;
       product.price = dto.price;
       product.stock = dto.stock;
+      product.weight = dto.weight
       product.wholesalePrice = dto.wholesalePrice;
       product.minWholesaleQuantity = dto.minWholesaleQuantity;
       product.available_colors = dto.available_colors;

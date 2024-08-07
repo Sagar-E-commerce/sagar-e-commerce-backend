@@ -42,7 +42,6 @@ export class AdminProfileMgtServices {
       admin.fullname = dto.firstname;
       admin.mobile = dto.mobile;
       admin.email = dto.email;
-      admin.Nationality = dto.Nationality;
       admin.gender = dto.gender;
       admin.UpdatedAt = new Date();
 

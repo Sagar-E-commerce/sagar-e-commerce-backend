@@ -2,7 +2,7 @@ import { Entity, PrimaryGeneratedColumn, ManyToOne, OneToMany, Column } from 'ty
 import { UserEntity } from './users.entity';
 import { ProductEntity } from './products.entity';
 import { IOrder, IOrderItem } from 'src/user/order/order';
-import { OrderStatus, OrderType, paymentType } from 'src/Enums/all-enums';
+import { ORDERTYPE, OrderStatus, OrderType, paymentType } from 'src/Enums/all-enums';
 ;
 
 @Entity('orders')
@@ -26,7 +26,22 @@ export class OrderEntity implements IOrder {
   billing_address: string;
 
   @Column({nullable:true})
+  billing_address_2:string
+
+  @Column({nullable:true})
+  billing_city: string;
+
+  @Column({nullable:true})
+  billing_state: string;
+
+  @Column({nullable:true})
+  billing_pincode: string;
+
+  @Column({nullable:true})
   email: string;
+
+  @Column('simple-array',{nullable:true})
+  availableCourierIds: string[];
 
 
   @OneToMany(() => OrderItemEntity, (orderItem) => orderItem.order, { cascade: true })
@@ -51,8 +66,8 @@ export class OrderEntity implements IOrder {
   @Column({ default: false })
   isPaid: boolean;
 
-  @Column({type:'enum', enum:OrderType, nullable:true})
-  orderType:OrderType
+  @Column({nullable:true, type:'enum', enum:ORDERTYPE})
+  orderType:ORDERTYPE
 
   @Column({type:'enum', enum:paymentType, nullable:true})
   paymentMethod:paymentType
@@ -69,14 +84,29 @@ export class OrderEntity implements IOrder {
   @Column({nullable:true, type:"timestamp"})
   updatedAT: Date;
 
+   @Column({nullable:true})
+  shipmentID:string
+
   @Column({nullable:true})
-  dropoffpincode:string
+  awbCode:string
+
+  @Column({nullable:true})
+  shiprocketPickupStatus:string
+
+
+  @Column({nullable:true})
+  shiprocketPickupToken:string
 
   @Column({nullable:true})
   pickuppincode:string
 
   @Column('decimal',{nullable:true})
   weight: number
+
+  @Column('jsonb', { nullable: true })
+  courierInfo: Record<string, any>;
+
+
 
 }
 

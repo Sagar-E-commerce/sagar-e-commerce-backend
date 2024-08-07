@@ -341,7 +341,7 @@ export class OrderMgtService {
 
       if (!coupons)
         throw new NotFoundException(
-          `oops! no coupons have been created at the moment in Baby n' Stuff`,
+          `oops! no coupons have been created at the moment`,
         );
 
       return coupons;
@@ -377,7 +377,7 @@ export class OrderMgtService {
       else {
         console.log(error);
         throw new InternalServerErrorException(
-          'something went wrong while trying to delete a promo discount ',error.message
+          'something went wrong while trying to delete a coupon code ',error.message
         );
       }
     }
@@ -425,7 +425,7 @@ export class OrderMgtService {
       const notification = new Notifications();
       notification.account = 'super admin';
       notification.subject = 'FlatRate Updated!';
-      notification.message = `the Admin have updated FlatRate on baby n stuff `;
+      notification.message = `the Admin have updated FlatRate `;
       await this.notificationripo.save(notification);
 
       return flatRate;
@@ -459,7 +459,7 @@ export class OrderMgtService {
       const notification = new Notifications();
       notification.account = 'super admin';
       notification.subject = 'FlatRate Deleted!';
-      notification.message = `The admin has deleted a flat rate on Baby N Stuff`;
+      notification.message = `The admin has deleted a flatrate`;
       await this.notificationripo.save(notification);
   
       return { message: "Shipping flat rate deleted successfully" };

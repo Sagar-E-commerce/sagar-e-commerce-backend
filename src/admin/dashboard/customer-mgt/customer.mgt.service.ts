@@ -95,35 +95,52 @@ export class CustomerMgtService {
 
   //search users
 
-  async searchUsers(keyword: string): Promise<IUser[]> {
+  async searchUsers(
+    keyword: string,
+    page?: number,
+    perPage?: number,
+    sort?: string,
+    // Add filter options here (e.g., category, price range)
+  ): Promise<{ data: UserEntity[]; total: number }> {
     try {
-      // Build query criteria
-      const criteria: any = {};
+      const qb = this.userRepo.createQueryBuilder('user');
+  
+      qb.where('user.fullname ILIKE :keyword', { keyword: `%${keyword}%`});
 
-      if (keyword) {
-        criteria.fullname = Like(`%${keyword}%`);
+      qb.cache(false)
+  
+      // Add filtering based on additional criteria here
+  
+      if (sort) {
+        const [sortField] = sort.split(',');
+        qb.orderBy(`user.${sortField}`, 'DESC');
       }
-
-     
-
-      // Search user
-      const user = await this.userRepo.find({
-        where: criteria,
-        relations: ['orders','favourites'],
-      });
-
-      if (!user) throw new NotFoundException('user not found');
-
-      return user;
+  
+      if (page && perPage) {
+        qb.skip((page - 1) * perPage).take(perPage);
+      }
+  
+      const [users, total] = await qb.getManyAndCount();
+  
+      if (!users.length) {
+        throw new NotFoundException(
+          `No products found matching your search criteria for "${keyword}".`,
+        );
+      }
+  
+      return { data: users, total };
     } catch (error) {
-      if (error instanceof NotFoundException)
-        throw new NotFoundException(error.message);
-      else {
-        console.error('Error searching user:', error);
-        throw new InternalServerErrorException('Failed to search for user ',error.message);
+      if (error instanceof NotFoundException) {
+        throw error;
+      } else {
+        console.error(error);
+        throw new InternalServerErrorException(
+          'An error occurred while searching for products. Please try again later.',
+        );
       }
     }
   }
+
 
   async GetAllNewsLetterSubscribers(page: number = 1, limit: number = 30) {
     try {
