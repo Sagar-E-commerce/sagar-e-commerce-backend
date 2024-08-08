@@ -321,26 +321,7 @@ export class AdminsMgtService {
     return staff;
   }
 
-  async GeneratePasscode() {
-    try {
-      const code = await this.generatorservice.generatePassCode();
-      //const hashcode = await this.generatorservice.hashpassword(code);
-
-      const newcode = new PasscodeEntity();
-      newcode.passcode = code;
-      newcode.updatedAT = new Date();
-      await this.passcodeRipo.save(newcode);
-
-      return { message: 'new pass code generated', code };
-    } catch (error) {
-      console.log(error);
-      throw new InternalServerErrorException(
-        'something went wrong when creating the passcode',
-        error.message,
-      );
-    }
-  }
-
+ 
   async UpdatePasscode(admin: AdminEntity, id: number) {
     try {
       const findadmin = await this.adminripo.findOne({

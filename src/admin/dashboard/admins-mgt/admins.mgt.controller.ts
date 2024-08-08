@@ -108,11 +108,8 @@ export class AdminMgtController {
     return await this.adminsmgtservice.AdminCount();
   }
 
-  @AdminAccessLevel(AdminAccessLevels.LEVEL3)
-  @Post('generate-passcode')
-  async GeneratePasscode() {
-    return await this.adminsmgtservice.GeneratePasscode();
-  }
+ 
+
 
   @AdminAccessLevel(AdminAccessLevels.LEVEL3)
   @Patch('update-passcode/:passcodeID')

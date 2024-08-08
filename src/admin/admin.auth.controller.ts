@@ -16,6 +16,11 @@ import { PasscodeDto } from './dto/otherDto';
 export class AdminAuthController {
   constructor(private readonly adminauthservice: AdminAuthService) {}
 
+  @Post('generate-passcode')
+  async GeneratePasscode() {
+    return await this.adminauthservice.GeneratePasscode();
+  }
+
   @UseGuards(JwtGuard)
   @Get('profile')
   async getProfile(@Req() req) {
