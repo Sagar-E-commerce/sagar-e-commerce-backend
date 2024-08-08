@@ -84,8 +84,6 @@ export class UserAuthService {
       user.userID = `#TgmU-${await this.generatorservice.generateUserID()}`;
       user.email = dto.email;
       user.fullname = dto.fullname;
-      user.dropOffpincode = dto.dropoffcode
-      user.pickuppincode = process.env.PICKUPCODE
       user.mobile = dto.mobile;
       user.password = hashedpassword;
       user.RegisteredAt = new Date();

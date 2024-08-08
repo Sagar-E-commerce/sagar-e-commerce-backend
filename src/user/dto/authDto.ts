@@ -26,9 +26,6 @@ export class RegisterUserDto{
     })
     password :string
 
-    @IsString()
-    @IsNotEmpty()
-    dropoffcode:string
 
     @IsString()
     @IsNotEmpty()
