@@ -181,8 +181,8 @@ export class PayUmoneyPaymentGatewayService {
       firstname: order.user.fullname,
       email: order.user.email,
       phone: order.user.mobile,
-      surl: 'https://yourwebsite.com/payment-success',
-      furl: 'https://yourwebsite.com/payment-failure',
+      surl: 'https://www.thegearmates.com/payment-success',
+      furl: 'https://www.thegearmates.com/payment-failure',
       hash:''
     };
 
@@ -191,19 +191,27 @@ export class PayUmoneyPaymentGatewayService {
     payload.hash = crypto.createHash('sha512').update(hashString).digest('hex');
 
     try {
-      // Send the payment creation request to PayUMoney
-      const response = await axios.post(
-        apiEndpoint,
-        qs.stringify(payload), // Send payload as form data
-        {
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-          },
-        },
-      );
+      // Generate the hash
+    const hashString = `${payload.key}|${payload.txnid}|${payload.amount}|${payload.productinfo}|${payload.firstname}|${payload.email}|||||||||||${salt}`;
+    payload.hash = crypto.createHash('sha512').update(hashString).digest('hex');
 
-      // Return the response data
-      return response.data;
+    // Generate the HTML form
+    const formHtml = `
+      <form id="paymentForm" method="post" action="${apiEndpoint}">
+        ${Object.entries(payload).map(([key, value]) => 
+          `<input type="hidden" name="${key}" value="${value}">`
+        ).join('')}
+      </form>
+      <script>
+        document.getElementById('paymentForm').submit();
+      </script>
+    `;
+
+    // Return the HTML form
+    return {
+      success: true,
+      data: formHtml
+    };
     } catch (error) {
       console.log(error.response?.data || error.message);
       throw new InternalServerErrorException('Failed to create PayUMoney payment', error.message);

@@ -125,7 +125,7 @@ export class CashfreePaymentGatewayService {
       },
       order_meta: {
         //return_url: 'https://yourwebsite.com/return',
-        notify_url: 'https://972a-102-88-68-72.ngrok-free.app/api/v1/sagar_stores_api/payment-gateway-config/webhook/cashfree',
+        notify_url: 'https://sagar-e-commerce-backend.onrender.com/api/v1/sagar_stores_api/payment-gateway-config/webhook/cashfree',
       },
       order_note: "create order for the gearmates",
     };
@@ -135,10 +135,10 @@ export class CashfreePaymentGatewayService {
       const data = response.data;
       const paymentSessionId = data.payment_session_id;
   
-      // Construct the payment URL
-      const paymentUrl = `https://sandbox.cashfree.com/pg/pay/${paymentSessionId}`;
-  
-      // Return the payment URL
+        // Construct the payment URL
+        const paymentUrl = `https://sandbox.cashfree.com/pg/web/pay?payment_session_id=${paymentSessionId}`;
+
+      
       return {
        
         success: true,

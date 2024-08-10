@@ -311,7 +311,7 @@ export class OrderService {
     }
   
       order.shippinFee = selectedCourier.rate;
-      order.total = order.subTotal + order.shippinFee;
+      order.total = Number(order.subTotal) + Number(order.shippinFee);
       order.courierInfo = {
         id: selectedCourier.courier_company_id.toString(),
         name: selectedCourier.courier_name,
