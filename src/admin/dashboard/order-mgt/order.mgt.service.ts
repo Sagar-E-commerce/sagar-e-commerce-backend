@@ -502,12 +502,21 @@ export class OrderMgtService {
 
   async getRevenueFromSuccessfulOrders(): Promise<number> {
     const successfulOrders = await this.orderRepo.find({
-      where: { isPaid:true },
       select: ['total'],
+      //where: { isPaid: true }
     });
   
-    const totalRevenue = successfulOrders.reduce((sum, order) => sum + order.total, 0);
-    return totalRevenue;
+    console.log('Fetched orders:', successfulOrders);
+  
+    const totalRevenue = successfulOrders.reduce((sum, order) => {
+      const orderTotal = Number(order.total) || 0;
+      console.log(`Processing order total: ${order.total}, converted to: ${orderTotal}`);
+      return sum + orderTotal;
+    }, 0);
+  
+    console.log('Calculated total revenue:', totalRevenue);
+  
+    return Number(totalRevenue.toFixed(2));
   }
 
 

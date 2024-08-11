@@ -786,33 +786,61 @@ async sendOrderConfirmationWithReceipt(
     </html>
   `;
 
-    // Ensure price is a number
-    const processedItems = items.map((item) => ({
-      ...item,
-      price: typeof item.price === 'number' ? item.price : parseFloat(item.price),
-    }));
+  //   // Ensure price is a number
+  //   const processedItems = items.map((item) => ({
+  //     ...item,
+  //     price: typeof item.price === 'number' ? item.price : parseFloat(item.price),
+  //   }));
 
-    const processedTotal = typeof total === 'number' ? total : parseFloat(total);
+  //   const processedTotal = typeof total === 'number' ? total : parseFloat(total);
 
 
-  const pdfBuffer = await this.createReceiptPdf(receiptId, name, processedItems, processedTotal);
+  // const pdfBuffer = await this.createReceiptPdf(receiptId, name, processedItems, processedTotal);
 
-  await this.mailerservice.sendMail({
-    to: email,
-    subject,
-    html: content,
-    attachments: [
-      {
-        filename: 'receipt.pdf',
-        content: pdfBuffer,
-        contentType: 'application/pdf',
-      },
-    ],
-  });
+  // await this.mailerservice.sendMail({
+  //   to: email,
+  //   subject,
+  //   html: content,
+  //   attachments: [
+  //     {
+  //       filename: 'thegearmates_order_receipt.pdf',
+  //       content: pdfBuffer,
+  //       contentType: 'application/pdf',
+  //     },
+  //   ],
+  // });
+
+  // Ensure price is a number and handle potential NaN values
+const processedItems = items.map((item) => ({
+  ...item,
+  price: Number(item.price) || 0, // Convert to number, default to 0 if NaN
+  quantity: Number(item.quantity) || 1, // Ensure quantity is a number, default to 1 if NaN
+}));
+
+// Calculate the total from processed items
+const calculatedTotal = processedItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+
+// Use the calculated total, but fall back to the provided total if necessary
+const processedTotal = Number(calculatedTotal) || Number(total) || 0;
+
+// Round the total to two decimal places
+const roundedTotal = Number(processedTotal.toFixed(2));
+
+const pdfBuffer = await this.createReceiptPdf(receiptId, name, processedItems, roundedTotal);
+
+await this.mailerservice.sendMail({
+  to: email,
+  subject,
+  html: content,
+  attachments: [
+    {
+      filename: 'thegearmates_order_receipt.pdf',
+      content: pdfBuffer,
+      contentType: 'application/pdf',
+    },
+  ],
+});
 }
-
-
-
 
 
 }
