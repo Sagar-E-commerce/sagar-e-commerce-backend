@@ -138,6 +138,25 @@ export class CashfreePaymentGatewayService {
         // Construct the payment URL
         const paymentUrl = `https://sandbox.cashfree.com/pg/web/pay?payment_session_id=${paymentSessionId}`;
 
+         // Prepare the items array for the receipt
+         const items = order.items.map((item) => ({
+          description: item.product.name,
+          quantity: item.quantity,
+          price: typeof item.price === 'number' ? item.price : parseFloat(item.price),
+        }));
+
+        const receiptid = await this.generatorservice.generatereceiptID();
+        const total = typeof order.total === 'number' ? order.total : parseFloat(order.total);
+        
+        await this.mailer.sendOrderConfirmationWithReceipt(
+          order.user.email,
+          order.user.fullname,
+          order.trackingID,
+          receiptid,
+          items,
+          total,
+        );
+
       
       return {
        
