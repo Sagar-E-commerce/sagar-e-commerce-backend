@@ -103,8 +103,9 @@ export class RazorPayPaymentGatewayService {
 
     const order = await this.orderRepo.findOne({
       where: { id: orderDetails.id },
-      relations: ['user', 'items'],
+      relations: ['user', 'items','items.product'],
     });
+    console.log(order)
     if (!order)
       throw new NotFoundException(
         `The order with the ID ${orderDetails.id} does not exist`,
@@ -130,11 +131,15 @@ export class RazorPayPaymentGatewayService {
       );
 
        // Prepare the items array for the receipt
-       const items = order.items.map((item) => ({
+       console.log('order items before mapping', order.items);
+       const items = order.items.map((item) => (console.log('processing item',item),{
+        
         description: item.product.name,
         quantity: item.quantity,
         price: typeof item.price === 'number' ? item.price : parseFloat(item.price),
       }));
+
+      console.log('mapped items ',items)
 
       const receiptid = await this.generatorservice.generatereceiptID();
       const total = typeof order.total === 'number' ? order.total : parseFloat(order.total);

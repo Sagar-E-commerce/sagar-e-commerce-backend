@@ -106,7 +106,7 @@ export class CashfreePaymentGatewayService {
   async createPaymentCashfree(orderDetails: OrderEntity): Promise<any> {
     const order = await this.orderRepo.findOne({
       where: { id: orderDetails.id },
-      relations: ['user', 'items'],
+      relations: ['user', 'items','items.product'],
     });
 
     if (!order)

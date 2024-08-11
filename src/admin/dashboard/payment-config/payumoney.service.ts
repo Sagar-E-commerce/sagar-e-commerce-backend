@@ -158,7 +158,7 @@ export class PayUmoneyPaymentGatewayService {
     // Find the order and its associated user and items
     const order = await this.orderRepo.findOne({
       where: { id: orderDetails.id },
-      relations: ['user', 'items'],
+      relations: ['user', 'items','items.product'],
     });
     if (!order) {
       throw new NotFoundException(`The order with the ID ${orderDetails.id} does not exist`);
@@ -212,6 +212,7 @@ export class PayUmoneyPaymentGatewayService {
     `;
 
      // Prepare the items array for the receipt
+     
      const items = order.items.map((item) => ({
       description: item.product.name,
       quantity: item.quantity,
