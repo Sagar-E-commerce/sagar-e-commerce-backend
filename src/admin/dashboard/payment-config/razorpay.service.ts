@@ -152,51 +152,69 @@ export class RazorPayPaymentGatewayService {
 
   //for the customer after their payment
   async handleRazorpayWebhook(req: any, res: any): Promise<void> {
-   
-    const secret = "thegearmates";
-
-    const shasum = crypto.createHmac('sha256', secret);
-    shasum.update(JSON.stringify(req.body));
-    const expectedSignature = shasum.digest('hex');
-    const receivedSignature = req.headers['x-razorpay-signature'];
-
-    if (receivedSignature !== expectedSignature) {
-      res.status(400).send('Invalid signature');
-      return;
-    }
-
-    const event = req.body;
-    if (event.event === 'payment.captured') {
-      const order = await this.orderRepo.findOne({
-        where: { orderID: event.payload.payment.entity.order_id },
-        relations: ['user', 'items'],
-      });
-      if (order) {
-        order.isPaid = true;
-        await this.orderRepo.save(order);
-
- 
-       // Prepare the items array for the receipt and forward it to the user's mail
-       const items = order.items.map((item) => ({
-         description: item.product.name,
-         quantity: item.quantity,
-         price: typeof item.price === 'number' ? item.price : parseFloat(item.price),
-       }));
-
-       const receiptid = await this.generatorservice.generatereceiptID()
-       const total = typeof order.total === 'number' ? order.total : parseFloat(order.total);
-       
-       await this.mailer.sendOrderConfirmationWithReceipt(
-         order.user.email,
-         order.user.fullname,
-         order.trackingID,
-         receiptid,
-         items,
-         total,
-       );
+    try {
+      const secret = "thegearmates";  // Consider storing this in an environment variable
+  
+      console.log('Received Razorpay webhook:', JSON.stringify(req.body));
+  
+      const shasum = crypto.createHmac('sha256', secret);
+      shasum.update(JSON.stringify(req.body));
+      const expectedSignature = shasum.digest('hex');
+      const receivedSignature = req.headers['x-razorpay-signature'];
+  
+      if (receivedSignature !== expectedSignature) {
+        console.error('Invalid Razorpay signature');
+        return res.sendStatus(200);  // Still acknowledge receipt of the webhook
       }
+  
+      const event = req.body;
+      if (event.event === 'payment.captured') {
+        try {
+          const order = await this.orderRepo.findOne({
+            where: { orderID: event.payload.payment.entity.order_id },
+            relations: ['user', 'items'],
+          });
+  
+          if (order) {
+            console.log('Found order:', order);
+            order.isPaid = true;
+            await this.orderRepo.save(order);
+            console.log('Updated order status to paid');
+  
+            // Prepare the items array for the receipt
+            const items = order.items.map((item) => ({
+              description: item.product.name,
+              quantity: item.quantity,
+              price: typeof item.price === 'number' ? item.price : parseFloat(item.price),
+            }));
+  
+            const receiptid = await this.generatorservice.generatereceiptID();
+            const total = typeof order.total === 'number' ? order.total : parseFloat(order.total);
+            
+            await this.mailer.sendOrderConfirmationWithReceipt(
+              order.user.email,
+              order.user.fullname,
+              order.trackingID,
+              receiptid,
+              items,
+              total,
+            );
+            console.log('Sent order confirmation email');
+          } else {
+            console.error('Order not found:', event.payload.payment.entity.order_id);
+          }
+        } catch (error) {
+          console.error('Error processing successful Razorpay payment:', error);
+          // Don't throw here, just log the error
+        }
+      } else {
+        console.log('Received non-payment.captured event:', event.event);
+      }
+  
+      res.sendStatus(200);  // Always acknowledge receipt of the webhook
+    } catch (error) {
+      console.error('Razorpay webhook processing error:', error);
+      res.sendStatus(200);  // Still acknowledge receipt of the webhook
     }
-
-    res.sendStatus(200);
   }
 }

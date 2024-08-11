@@ -17,12 +17,16 @@ import * as crypto from 'crypto';
 import * as qs from 'qs';
 import { OrderEntity } from 'src/Entity/order.entity';
 import { OrderRepository, PayUmoneyRepostory } from 'src/user/user.repository';
+import { Mailer } from 'src/common/mailer/mailer.service';
+import { GeneatorService } from 'src/common/services/generator.service';
 
 export class PayUmoneyPaymentGatewayService {
   constructor(
     @InjectRepository(PayUmoneyEntity)
     private readonly payUmoneyripo: PayUmoneyRepostory,
     @InjectRepository(OrderEntity) private readonly orderRepo: OrderRepository,
+    private generatorservice:GeneatorService,
+    private mailer:Mailer
   ) {}
 
   async getConfig(): Promise<PayUmoneyEntity> {
@@ -219,30 +223,69 @@ export class PayUmoneyPaymentGatewayService {
   }
 
   async handlePayuMoneyWebhook(req: any, res: any): Promise<void> {
-    const config = await this.getConfig();
-    const signature = req.headers['x-payumoney-signature'];
-    const expectedSignature = crypto
-      .createHmac('sha512', config.payumoneyWebhookSecret)
-      .update(JSON.stringify(req.body))
-      .digest('hex');
-
-    if (signature !== expectedSignature) {
-      res.sendStatus(400);
-      return;
-    }
-
-    const event = req.body;
-    if (event.event === 'payment.success') {
-      const order = await this.orderRepo.findOne({
-        where: { id: event.data.order_id },
-        relations: ['user', 'items'],
-      });
-      if (order) {
-        order.isPaid = true;
-        await this.orderRepo.save(order);
+    try {
+      const config = await this.getConfig();
+      const signature = req.headers['x-payumoney-signature'];
+      const expectedSignature = crypto
+        .createHmac('sha512', config.payumoneyWebhookSecret)
+        .update(JSON.stringify(req.body))
+        .digest('hex');
+  
+      if (signature !== expectedSignature) {
+        console.error('Invalid PayUMoney webhook signature');
+        return res.sendStatus(400);
       }
+  
+      const event = req.body;
+      console.log('Received PayUMoney webhook:', event);
+  
+      if (event.event === 'payment.success') {
+        try {
+          const order = await this.orderRepo.findOne({
+            where: { id: event.data.order_id },
+            relations: ['user', 'items'],
+          });
+  
+          if (order) {
+            console.log('Found order:', order);
+            order.isPaid = true;
+            await this.orderRepo.save(order);
+            console.log('Updated order status to paid');
+  
+            // Prepare the items array for the receipt
+            const items = order.items.map((item) => ({
+              description: item.product.name,
+              quantity: item.quantity,
+              price: typeof item.price === 'number' ? item.price : parseFloat(item.price),
+            }));
+  
+            const receiptid = await this.generatorservice.generatereceiptID();
+            const total = typeof order.total === 'number' ? order.total : parseFloat(order.total);
+            
+            await this.mailer.sendOrderConfirmationWithReceipt(
+              order.user.email,
+              order.user.fullname,
+              order.trackingID,
+              receiptid,
+              items,
+              total,
+            );
+            console.log('Sent order confirmation email');
+          } else {
+            console.error('Order not found:', event.data.order_id);
+          }
+        } catch (error) {
+          console.error('Error processing successful PayUMoney payment:', error);
+          // Don't throw here, just log the error
+        }
+      } else {
+        console.log('Received non-payment.success event:', event.event);
+      }
+  
+      res.sendStatus(200); // Always acknowledge receipt of the webhook
+    } catch (error) {
+      console.error('PayUMoney webhook processing error:', error);
+      res.sendStatus(200); // Still acknowledge receipt of the webhook
     }
-
-    res.sendStatus(200);
   }
 }
