@@ -60,12 +60,10 @@ export class UserAuthController {
 
   @Patch('/reset-password')
   async ResetPassword(
-    @Req() req: Request,
     @Body() dto: addPasswordDto,
   ): Promise<{ message: string }> {
-    const adminID = req.headers.id;
+  
     return await this.userauthservice.FinallyResetPasswordAfterVerification(
-      adminID,
       dto,
     );
   }

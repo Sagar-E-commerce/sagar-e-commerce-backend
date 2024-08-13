@@ -363,12 +363,12 @@ export class UserAuthService {
 
   //reset password
   async FinallyResetPasswordAfterVerification(
-    userID: string | any,
+  
     dto: addPasswordDto,
   ): Promise<{ message: string }> {
     try {
       const checkuser = await this.userRepo.findOne({
-        where: { id: userID },
+        where: { email:dto.email },
       });
       if (!checkuser.isVerified)
         throw new UnauthorizedException(
